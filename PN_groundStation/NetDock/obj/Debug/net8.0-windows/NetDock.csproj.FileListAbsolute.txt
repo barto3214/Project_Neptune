@@ -1,0 +1,14 @@
+C:\Users\barte\Desktop\NetDock\obj\Debug\net8.0-windows\Styles\Commons.baml
+C:\Users\barte\Desktop\NetDock\obj\Debug\net8.0-windows\Controls\DockItem.g.cs
+C:\Users\barte\Desktop\NetDock\obj\Debug\net8.0-windows\Controls\DockWindow.g.cs
+C:\Users\barte\Desktop\NetDock\obj\Debug\net8.0-windows\DockSurface.g.cs
+C:\Users\barte\Desktop\NetDock\obj\Debug\net8.0-windows\DockTab.g.cs
+C:\Users\barte\Desktop\NetDock\obj\Debug\net8.0-windows\NetDock_MarkupCompile.cache
+C:\Users\barte\Desktop\NetDock\obj\Debug\net8.0-windows\NetDock_MarkupCompile.lref
+C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\NetDock\obj\Debug\net8.0-windows\Styles\Commons.baml
+C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\NetDock\obj\Debug\net8.0-windows\Controls\DockItem.g.cs
+C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\NetDock\obj\Debug\net8.0-windows\Controls\DockWindow.g.cs
+C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\NetDock\obj\Debug\net8.0-windows\DockSurface.g.cs
+C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\NetDock\obj\Debug\net8.0-windows\DockTab.g.cs
+C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\NetDock\obj\Debug\net8.0-windows\NetDock_MarkupCompile.cache
+C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\NetDock\obj\Debug\net8.0-windows\NetDock_MarkupCompile.lref

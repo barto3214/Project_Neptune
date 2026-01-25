@@ -1,0 +1,116 @@
+﻿<UserControl x:Class="PN_Ground_Station.DockWindows.ChartsWindow"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+             Background="#1E1E1E">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- pH Chart -->
+        <Border Grid.Row="0" Grid.Column="0" Background="#252526" 
+                BorderBrush="#3F3F46" BorderThickness="1" Margin="5">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Text="pH Level" 
+                           Foreground="#CCCCCC" FontSize="14" FontWeight="Bold"
+                           Margin="10,10,10,5"/>
+                <lvc:CartesianChart Grid.Row="1" Series="{Binding PhSeries}" 
+                                    Margin="10,0,10,10"
+                                    Background="Transparent"
+                                    DisableAnimations="True">
+                    <lvc:CartesianChart.AxisY>
+                        <lvc:Axis Title="pH" Foreground="#CCCCCC"></lvc:Axis>
+                    </lvc:CartesianChart.AxisY>
+                    <lvc:CartesianChart.AxisX>
+                        <lvc:Axis Title="Time" Foreground="#CCCCCC"></lvc:Axis>
+                    </lvc:CartesianChart.AxisX>
+                </lvc:CartesianChart>
+            </Grid>
+        </Border>
+
+        <!-- TDS Chart -->
+        <Border Grid.Row="0" Grid.Column="1" Background="#252526" 
+                BorderBrush="#3F3F46" BorderThickness="1" Margin="5">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Text="TDS (Total Dissolved Solids)" 
+                           Foreground="#CCCCCC" FontSize="14" FontWeight="Bold"
+                           Margin="10,10,10,5"/>
+                <lvc:CartesianChart Grid.Row="1" Series="{Binding TdsSeries}" 
+                                    Margin="10,0,10,10"
+                                    Background="Transparent"
+                                    DisableAnimations="True">
+                    <lvc:CartesianChart.AxisY>
+                        <lvc:Axis Title="TDS (ppm)" Foreground="#CCCCCC"></lvc:Axis>
+                    </lvc:CartesianChart.AxisY>
+                    <lvc:CartesianChart.AxisX>
+                        <lvc:Axis Title="Time" Foreground="#CCCCCC"></lvc:Axis>
+                    </lvc:CartesianChart.AxisX>
+                </lvc:CartesianChart>
+            </Grid>
+        </Border>
+
+        <!-- Temperature Chart -->
+        <Border Grid.Row="1" Grid.Column="0" Background="#252526" 
+                BorderBrush="#3F3F46" BorderThickness="1" Margin="5">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Text="Temperature (°C)" 
+                           Foreground="#CCCCCC" FontSize="14" FontWeight="Bold"
+                           Margin="10,10,10,5"/>
+                <lvc:CartesianChart Grid.Row="1" Series="{Binding TempSeries}" 
+                                    Margin="10,0,10,10"
+                                    Background="Transparent"
+                                    DisableAnimations="True">
+                    <lvc:CartesianChart.AxisY>
+                        <lvc:Axis Title="°C" Foreground="#CCCCCC"></lvc:Axis>
+                    </lvc:CartesianChart.AxisY>
+                    <lvc:CartesianChart.AxisX>
+                        <lvc:Axis Title="Time" Foreground="#CCCCCC"></lvc:Axis>
+                    </lvc:CartesianChart.AxisX>
+                </lvc:CartesianChart>
+            </Grid>
+        </Border>
+
+        <!-- Conductivity Chart -->
+        <Border Grid.Row="1" Grid.Column="1" Background="#252526" 
+                BorderBrush="#3F3F46" BorderThickness="1" Margin="5">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Text="Conductivity (µS/cm)" 
+                           Foreground="#CCCCCC" FontSize="14" FontWeight="Bold"
+                           Margin="10,10,10,5"/>
+                <lvc:CartesianChart Grid.Row="1" Series="{Binding CondSeries}" 
+                                    Margin="10,0,10,10"
+                                    Background="Transparent"
+                                    DisableAnimations="True">
+                    <lvc:CartesianChart.AxisY>
+                        <lvc:Axis Title="µS/cm" Foreground="#CCCCCC"></lvc:Axis>
+                    </lvc:CartesianChart.AxisY>
+                    <lvc:CartesianChart.AxisX>
+                        <lvc:Axis Title="Time" Foreground="#CCCCCC"></lvc:Axis>
+                    </lvc:CartesianChart.AxisX>
+                </lvc:CartesianChart>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

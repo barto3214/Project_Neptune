@@ -4,7 +4,7 @@
  * WERSJA Z PEŁNĄ DIAGNOSTYKĄ
  * 
  * Pinout:
- * NRF905 VCC  -> 3.3V (ważne! nie 5V)
+ * NRF905 VCC  -> 3.3V
  * NRF905 GND  -> GND
  * NRF905 MOSI -> D11
  * NRF905 MISO -> D12
@@ -66,11 +66,6 @@ uint32_t txFailCount = 0;
 void setup() {
   Serial.begin(115200);
   while (!Serial && millis() < 3000); // Czekaj na Serial (max 3s)
-  
-  Serial.println(F("========================================"));
-  Serial.println(F("NRF905 Transmitter - DIAGNOSTYKA"));
-  Serial.println(F("========================================"));
-  Serial.println();
   
   // Konfiguracja pinów
   pinMode(NRF905_CSN, OUTPUT);
@@ -204,7 +199,7 @@ void initNRF905() {
   digitalWrite(NRF905_TX_EN, LOW);
   delay(50);
   
-  // Konfiguracja NRF905 - UPROSZCZONA jak w działającym przykładzie
+  // Konfiguracja NRF905 
   // Format: [CMD, CH, Mode, Addr_width, RX_PW, TX_PW, RX_ADDR(4), Config]
   SPI.beginTransaction(nrf905_spi);
   digitalWrite(NRF905_CSN, LOW);
@@ -271,7 +266,7 @@ void verifyConfiguration() {
   
   SPI.transfer(CMD_R_CONFIG);
   
-  uint8_t config[11];  // ZMIENIONE: 11 bajtów zamiast 12
+  uint8_t config[11];  
   for (int i = 0; i < 11; i++) {
     config[i] = SPI.transfer(0x00);
   }
@@ -294,7 +289,7 @@ void verifyConfiguration() {
   Serial.println(config[4]);
   
   Serial.print(F("   RX_ADDR: "));
-  for (int i = 5; i <= 8; i++) {  // ZMIENIONE: bajty 5-8
+  for (int i = 5; i <= 8; i++) {
     Serial.print(F("0x"));
     Serial.print(config[i], HEX);
     if (i < 8) Serial.print(F(" "));
@@ -374,7 +369,7 @@ bool transmitDataWithDiagnostics() {
   
   delay(10);  // Opóźnienie po zapisie
   
-  // 3. Włącz tryb TX - POPRAWIONA SEKWENCJA
+  // 3. Włącz tryb TX 
   digitalWrite(NRF905_TX_EN, HIGH);  // Najpierw TX_EN
   delay(5);
   digitalWrite(NRF905_CE, HIGH);     // Potem CE
