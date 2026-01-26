@@ -16,5 +16,5 @@ TRACE;DEBUG;NET;NET6_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR
 203155564505
 Controls\DockItem.xaml;Controls\DockWindow.xaml;DockSurface.xaml;DockTab.xaml;Styles\Commons.xaml;
 
-False
+True
 

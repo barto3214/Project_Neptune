@@ -6,7 +6,13 @@
         xmlns:netdock="clr-namespace:NetDock;assembly=NetDock"
         xmlns:local="clr-namespace:PN_Ground_Station"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Water Quality Telemetry Station" 
+        Height="800" Width="1400"
+        WindowState="Maximized"
+        Background="#1E1E1E"
+        Loaded="Window_Loaded"
+        Closing="Window_Closing">
+
     <Window.Resources>
         <!-- Dark Theme Colors -->
         <SolidColorBrush x:Key="BackgroundBrush" Color="#1E1E1E"/>
@@ -62,24 +68,24 @@
 
                 <!-- Connection Controls -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal">
-                    <TextBox x:Name="txtServerAddress" Width="100" Text="127.0.0.1"  Margin="2"
+                    <TextBox x:Name="txtServerAddress" Width="120" Text="192.168.0.112" Margin="2"
                          VerticalContentAlignment="Center" Padding="8,4"/>
                     <TextBlock Text=":" Foreground="{StaticResource TextBrush}" 
-                           VerticalAlignment="Center"/>
+                           VerticalAlignment="Center" Margin="2,0"/>
                     <TextBox x:Name="txtServerPort" Width="60" Text="5000" Margin="2"
                          VerticalContentAlignment="Center" Padding="8,4"/>
 
-                    <Button x:Name="btnConnect" Content="Connect" Width="90" Margin="2"
+                    <Button x:Name="btnConnect" Content="Connect" Width="90" Margin="5,2"
                         Click="BtnConnect_Click"/>
                     <Button x:Name="btnDisconnect" Content="Disconnect" Width="90" Margin="2"
                         IsEnabled="False" Click="BtnDisconnect_Click"/>
 
                     <!-- Connection Indicator -->
                     <Ellipse x:Name="connectionIndicator" Width="14" Height="14" 
-                         Fill="Red" Margin="10,0,0,0"/>
+                         Fill="Red" Margin="15,0,5,0"/>
                     <TextBlock x:Name="txtConnectionStatus" Text="Disconnected" 
                            Foreground="{StaticResource TextBrush}" 
-                           VerticalAlignment="Center" Margin="5,0,0,0"/>
+                           VerticalAlignment="Center" Margin="5,0"/>
                 </StackPanel>
             </Grid>
         </Border>
@@ -88,7 +94,7 @@
         <netdock:DockSurface x:Name="dockSurface" Grid.Row="1"
                          Background="{StaticResource BackgroundBrush}"/>
 
-        
+
         <!-- Status Bar -->
         <Border Grid.Row="2" Background="{StaticResource SurfaceBrush}" 
             BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0"

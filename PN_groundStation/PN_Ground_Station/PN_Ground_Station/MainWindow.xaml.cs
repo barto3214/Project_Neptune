@@ -8,8 +8,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using NetDock.Controls;
-using NetDock.Enums;
+using NetDock; 
 using PN_Ground_Station.DockWindows;
 
 namespace PN_Ground_Station
@@ -34,34 +33,94 @@ namespace PN_Ground_Station
             _tcpClient.DataReceived += OnDataReceived;
             _tcpClient.ConnectionStatusChanged += OnConnectionStatusChanged;
             _tcpClient.ErrorOccurred += OnErrorOccurred;
+
+            // Initialize dock windows after component initialization
+            Loaded += Window_Loaded;
+            Closing += Window_Closing;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            System.Diagnostics.Debug.WriteLine("=== Window_Loaded START ===");
+
             // Initialize dock windows
             InitializeDockWindows();
 
             txtStatusMessage.Text = "Ready. Configure connection and click Connect.";
+
+            System.Diagnostics.Debug.WriteLine("=== Window_Loaded END ===");
         }
 
         private void InitializeDockWindows()
         {
-            // Create dock windows
-            _chartsWindow = new ChartsWindow();
-            _dataGridWindow = new DataGridWindow();
-            _cameraWindow = new CameraWindow();
-            _controlsWindow = new ControlsWindow();
+            System.Diagnostics.Debug.WriteLine(">>> InitializeDockWindows START");
 
-            // Add to dock surface
-            var chartsItem = new DockItem(_chartsWindow) { TabName = "📊 Charts" };
-            var dataGridItem = new DockItem(_dataGridWindow) { TabName = "📜 Data History" };
-            var cameraItem = new DockItem(_cameraWindow) { TabName = "📷 Camera" };
-            var controlsItem = new DockItem(_controlsWindow) { TabName = "⚙️ Controls" };
+            try
+            {
+                // Create dock windows
+                System.Diagnostics.Debug.WriteLine("Creating ChartsWindow...");
+                _chartsWindow = new ChartsWindow();
+                System.Diagnostics.Debug.WriteLine($"ChartsWindow created: {_chartsWindow != null}");
 
-            dockSurface.Add(chartsItem, DockDirection.Top);
-            dockSurface.Add(dataGridItem, DockDirection.Bottom);
-            dockSurface.Add(cameraItem, DockDirection.Left);
-            dockSurface.Add(controlsItem, DockDirection.Right);
+                System.Diagnostics.Debug.WriteLine("Creating DataGridWindow...");
+                _dataGridWindow = new DataGridWindow();
+                System.Diagnostics.Debug.WriteLine($"DataGridWindow created: {_dataGridWindow != null}");
+
+                System.Diagnostics.Debug.WriteLine("Creating CameraWindow...");
+                _cameraWindow = new CameraWindow();
+                System.Diagnostics.Debug.WriteLine($"CameraWindow created: {_cameraWindow != null}");
+
+                System.Diagnostics.Debug.WriteLine("Creating ControlsWindow...");
+                _controlsWindow = new ControlsWindow();
+                System.Diagnostics.Debug.WriteLine($"ControlsWindow created: {_controlsWindow != null}");
+
+                // Clear any existing content
+                System.Diagnostics.Debug.WriteLine("Clearing dockSurface...");
+                dockSurface.Clear();
+                System.Diagnostics.Debug.WriteLine($"DockSurface children after Clear: {dockSurface.Children.Count}");
+
+                // Create DockItems (using NetDock.DockItem, not NetDock.Controls.DockItem)
+                System.Diagnostics.Debug.WriteLine("Adding Camera to Left...");
+                var cameraItem = new NetDock.DockItem(_cameraWindow)
+                {
+                    TabName = "📷 Camera"
+                };
+                dockSurface.Add(cameraItem, NetDock.DockDirection.Left);
+                System.Diagnostics.Debug.WriteLine($"DockSurface children after Camera: {dockSurface.Children.Count}");
+
+                System.Diagnostics.Debug.WriteLine("Adding Charts to Top...");
+                var chartsItem = new NetDock.DockItem(_chartsWindow)
+                {
+                    TabName = "📊 Charts"
+                };
+                dockSurface.Add(chartsItem, NetDock.DockDirection.Top);
+                System.Diagnostics.Debug.WriteLine($"DockSurface children after Charts: {dockSurface.Children.Count}");
+
+                System.Diagnostics.Debug.WriteLine("Adding Controls to Bottom...");
+                var controlsItem = new NetDock.DockItem(_controlsWindow)
+                {
+                    TabName = "⚙️ Controls"
+                };
+                dockSurface.Add(controlsItem, NetDock.DockDirection.Bottom);
+                System.Diagnostics.Debug.WriteLine($"DockSurface children after Controls: {dockSurface.Children.Count}");
+
+                System.Diagnostics.Debug.WriteLine("Adding DataGrid to Right...");
+                var dataGridItem = new NetDock.DockItem(_dataGridWindow)
+                {
+                    TabName = "📜 Data History"
+                };
+                dockSurface.Add(dataGridItem, NetDock.DockDirection.Right);
+                System.Diagnostics.Debug.WriteLine($"DockSurface children after DataGrid: {dockSurface.Children.Count}");
+
+                System.Diagnostics.Debug.WriteLine(">>> InitializeDockWindows SUCCESS");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($">>> InitializeDockWindows ERROR: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+                MessageBox.Show($"Error initializing windows:\n{ex.Message}", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private async void BtnConnect_Click(object sender, RoutedEventArgs e)
@@ -115,8 +174,8 @@ namespace PN_Ground_Station
                 _packetCount++;
                 _dataHistory.Add(data);
 
-                // Keep only last 50 records
-                if (_dataHistory.Count > 50)
+                // Keep only last 100 records
+                if (_dataHistory.Count > 100)
                     _dataHistory.RemoveAt(0);
 
                 // Update status bar
@@ -125,7 +184,7 @@ namespace PN_Ground_Station
                 txtStatusMessage.Text = data.ToString();
 
                 // Update dock windows with new data
-                _chartsWindow?.AddDataPoint(data.Timestamp,data.Ph,data.Tds,data.Temperature,data.Conductivity);
+                _chartsWindow?.AddDataPoint(data.Timestamp, data.Ph, data.Tds, data.Temperature, data.Conductivity);
                 _dataGridWindow?.AddData(data);
                 _controlsWindow?.UpdateLatestData(data);
             });
@@ -144,6 +203,7 @@ namespace PN_Ground_Station
             Dispatcher.Invoke(() =>
             {
                 txtStatusMessage.Text = $"Error: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"TCP Error: {ex.Message}");
             });
         }
 

@@ -87,7 +87,9 @@ namespace PN_Ground_Station
                             Timestamp = (uint)jsonData.timestamp,
                             BatteryVoltage = (double)jsonData.battery_voltage,
                             ErrorFlags = (byte)jsonData.error_flags,
-                            ReceivedAt = DateTime.Parse((string)jsonData.received_at)
+                            ReceivedAt = DateTime.TryParse((string)jsonData.received_at, out DateTime parsedDate)
+                            ? parsedDate
+                            : DateTime.Now
                         };
 
                         // Fire event
