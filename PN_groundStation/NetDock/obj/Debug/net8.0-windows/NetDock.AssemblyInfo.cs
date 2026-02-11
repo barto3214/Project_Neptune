@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("NetDock")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+db76d349dabbf867d0e11e2b0004dcfdf0985806")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1708da152806657cb56467aca15a8c2cdfa40f22")]
 [assembly: System.Reflection.AssemblyProductAttribute("NetDock")]
 [assembly: System.Reflection.AssemblyTitleAttribute("NetDock")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

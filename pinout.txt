@@ -1,0 +1,72 @@
+ADS1115 do RP
+
+VDD → 3.3V
+GND → GND
+SCL → GPIO 3 (SCL)
+SDA → GPIO 2 (SDA)
+
+
+Czujnik pH:
+VCC → 3.3V 
+GND/G → GND
+Do → A0 na ADS1115
+
+
+Czujnik przewodności (EC/TDS):
+
+VCC/V+ → 5V Raspberry Pi
+GND/G → GND
+Wyjście analogowe (A/S/Signal) → A1 na ADS1115
+
+
+
+Podłączenie DS18B20
+Czujnik ma 3 przewody:
+
+Czerwony (VCC) → 3.3V Raspberry Pi 
+Czarny (GND) → GND 
+Zielony (DATA) → GPIO4 (pin 7)
+
+
+
+┌──────────────────────────────────────────────────────────┐
+│           RASPBERRY PI 4          →        nRF905        					│
+├──────────────────────────────────────────────────────────┤
+│ PIN 1   (3.3V)                    →  VCC                 					│
+│ PIN 6   (GND)                     →  GND                 					│
+│ PIN 19  (GPIO10 / MOSI)           →  MOSI                					│
+│ PIN 21  (GPIO9  / MISO)           →  MISO                					│
+│ PIN 23  (GPIO11 / SCLK)           →  SCK                 					│
+│ PIN 24  (GPIO8  / CE0)            →  CSN                 					│
+│ PIN 11  (GPIO17)                  →  CE                  					|
+│ PIN 17  (3.3V)                    →  PWR ✓ (na stałe)    					│
+│ PIN 13  (GPIO27)                  →  TX_EN               					│
+│                                      DR (nie podłączony)  				│
+│                                      ANT (antena SMA)     				│
+└──────────────────────────────────────────────────────────┘
+
+
+
+
+┌──────────────────────────────────────────────────────────┐
+│           Arduino Nano          →        nRF905        					│
+├──────────────────────────────────────────────────────────┤
+│ PIN 1   (3.3V)                    →  VCC                 					│
+│ PIN 6   (GND)                     →  GND                 					│
+│ PIN D11  				            →  MOSI                					│
+│ PIN D12  				            →  MISO                					│
+│ PIN D13  				            →  SCK                 					│
+│ PIN D10  				            →  CSN                 					│
+│ PIN D9  		                    →  CE                  					|
+│ PIN D8		                    →  PWR ✓ (na stałe)    					│
+│ PIN D7  		                    →  TX_EN               					│
+│                                      DR (nie podłączony)  				│
+│                                      ANT (antena SMA)     				│
+└──────────────────────────────────────────────────────────┘
+
+ZAJĘTE PINY RPi: 9 pinów fizycznych
+
+
+
+
+

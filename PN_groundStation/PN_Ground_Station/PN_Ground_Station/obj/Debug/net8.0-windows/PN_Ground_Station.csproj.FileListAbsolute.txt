@@ -1,8 +1,7 @@
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Ground_Station\bin\Debug\net8.0-windows\PN_Ground_Station.exe
-C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Ground_Station\bin\Debug\net8.0-windows\PN_Ground_Station.dll
-C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Ground_Station\bin\Debug\net8.0-windows\NetDock.dll
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Ground_Station\bin\Debug\net8.0-windows\PN_Ground_Station.deps.json
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Ground_Station\bin\Debug\net8.0-windows\PN_Ground_Station.runtimeconfig.json
+C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Ground_Station\bin\Debug\net8.0-windows\PN_Ground_Station.dll
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Ground_Station\bin\Debug\net8.0-windows\PN_Ground_Station.pdb
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Ground_Station\bin\Debug\net8.0-windows\WeifenLuo.WinFormsUI.Docking.dll
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Ground_Station\bin\Debug\net8.0-windows\LiveCharts.dll
@@ -27,12 +26,14 @@ C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Gro
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Ground_Station\bin\Debug\net8.0-windows\runtimes\osx-x64\native\libSystem.IO.Ports.Native.dylib
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Ground_Station\bin\Debug\net8.0-windows\runtimes\unix\lib\net8.0\System.IO.Ports.dll
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Ground_Station\bin\Debug\net8.0-windows\runtimes\win\lib\net8.0\System.IO.Ports.dll
+C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Ground_Station\bin\Debug\net8.0-windows\NetDock.dll
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Ground_Station\bin\Debug\net8.0-windows\NetDock.pdb
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Ground_Station\obj\Debug\net8.0-windows\PN_Ground_Station.csproj.AssemblyReference.cache
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Ground_Station\obj\Debug\net8.0-windows\Dock Windows\CameraWindow.baml
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Ground_Station\obj\Debug\net8.0-windows\Dock Windows\ChartsWindow.baml
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Ground_Station\obj\Debug\net8.0-windows\Dock Windows\ControlsWindow.baml
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Ground_Station\obj\Debug\net8.0-windows\Dock Windows\DataGridWindow.baml
+C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Ground_Station\obj\Debug\net8.0-windows\AboutMe.g.cs
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Ground_Station\obj\Debug\net8.0-windows\Dock Windows\CameraWindow.g.cs
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Ground_Station\obj\Debug\net8.0-windows\Dock Windows\ChartsWindow.g.cs
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Ground_Station\obj\Debug\net8.0-windows\Dock Windows\ControlsWindow.g.cs
@@ -41,6 +42,7 @@ C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Gro
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Ground_Station\obj\Debug\net8.0-windows\App.g.cs
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Ground_Station\obj\Debug\net8.0-windows\PN_Ground_Station_MarkupCompile.cache
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Ground_Station\obj\Debug\net8.0-windows\PN_Ground_Station_MarkupCompile.lref
+C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Ground_Station\obj\Debug\net8.0-windows\AboutMe.baml
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Ground_Station\obj\Debug\net8.0-windows\MainWindow.baml
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Ground_Station\obj\Debug\net8.0-windows\PN_Ground_Station.g.resources
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Ground_Station\obj\Debug\net8.0-windows\PN_Ground_Station.GeneratedMSBuildEditorConfig.editorconfig

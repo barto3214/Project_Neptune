@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="#1E1E1E">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
         <StackPanel Margin="15">
 
             <!-- Current Readings Section -->
@@ -109,10 +109,12 @@
             <Border Background="#252526" BorderBrush="#3F3F46" BorderThickness="1" 
                     Padding="15" Margin="0,0,0,15">
                 <StackPanel>
-                    <TextBlock Text="💧 Pump Control (Coming Soon)" 
+                    <TextBlock Text="💧 Remote control" 
                                Foreground="#CCCCCC" FontSize="16" FontWeight="Bold"
                                Margin="0,0,0,15"/>
 
+                    <Button Content="Measure" x:Name="btnMeasure" Height="40" 
+                    Margin="0,5" Click="btnMeasure_Click"  IsEnabled="True"/>
                     <Button Content="Start Intake Pump" Height="40" 
                             Margin="0,5" Click="BtnStartPump_Click" IsEnabled="False"/>
                     <Button Content="Start Discharge Pump" Height="40" 

@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET8_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;WINDOWS7_0_OR_GREATER
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\PN_Ground_Station\PN_Ground_Station\App.xaml
-5179534842
+6-1074664325
 
-101186447588
+11-519294234
 212-1048299128
-Dock Windows\CameraWindow.xaml;Dock Windows\ChartsWindow.xaml;Dock Windows\ControlsWindow.xaml;Dock Windows\DataGridWindow.xaml;MainWindow.xaml;
+AboutMe.xaml;Dock Windows\CameraWindow.xaml;Dock Windows\ChartsWindow.xaml;Dock Windows\ControlsWindow.xaml;Dock Windows\DataGridWindow.xaml;MainWindow.xaml;
 
 False
 

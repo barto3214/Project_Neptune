@@ -5,14 +5,14 @@ C:\Users\barte\Desktop\NetDock\obj\Debug\net8.0-windows\DockSurface.g.cs
 C:\Users\barte\Desktop\NetDock\obj\Debug\net8.0-windows\DockTab.g.cs
 C:\Users\barte\Desktop\NetDock\obj\Debug\net8.0-windows\NetDock_MarkupCompile.cache
 C:\Users\barte\Desktop\NetDock\obj\Debug\net8.0-windows\NetDock_MarkupCompile.lref
+C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\NetDock\bin\Debug\net8.0-windows\NetDock.deps.json
+C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\NetDock\bin\Debug\net8.0-windows\NetDock.dll
+C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\NetDock\bin\Debug\net8.0-windows\NetDock.pdb
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\NetDock\obj\Debug\net8.0-windows\NetDock.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\NetDock\obj\Debug\net8.0-windows\NetDock.AssemblyInfoInputs.cache
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\NetDock\obj\Debug\net8.0-windows\NetDock.AssemblyInfo.cs
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\NetDock\obj\Debug\net8.0-windows\NetDock.csproj.CoreCompileInputs.cache
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\NetDock\obj\Debug\net8.0-windows\NetDock.sourcelink.json
-C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\NetDock\bin\Debug\net8.0-windows\NetDock.deps.json
-C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\NetDock\bin\Debug\net8.0-windows\NetDock.dll
-C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\NetDock\bin\Debug\net8.0-windows\NetDock.pdb
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\NetDock\obj\Debug\net8.0-windows\NetDock.dll
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\NetDock\obj\Debug\net8.0-windows\refint\NetDock.dll
 C:\Users\barte\Desktop\Project_Neptune\PN_groundStation\NetDock\obj\Debug\net8.0-windows\NetDock.pdb

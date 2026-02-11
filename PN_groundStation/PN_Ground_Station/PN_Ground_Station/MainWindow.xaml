@@ -6,7 +6,7 @@
         xmlns:netdock="clr-namespace:NetDock;assembly=NetDock"
         xmlns:local="clr-namespace:PN_Ground_Station"
         mc:Ignorable="d"
-        Title="Water Quality Telemetry Station" 
+        Title="Water Quality Ground Station" 
         Height="800" Width="1400"
         WindowState="Maximized"
         Background="#1E1E1E"
@@ -86,6 +86,11 @@
                     <TextBlock x:Name="txtConnectionStatus" Text="Disconnected" 
                            Foreground="{StaticResource TextBrush}" 
                            VerticalAlignment="Center" Margin="5,0"/>
+
+                    <Button x:Name="btnSettings" Content="⚙" Width="40" Height="40" Margin="15,0,10,0"
+                        Click="btnSettings_Click"/>
+                    <Button x:Name="btnAbout" Content="❓" Width="40" Height="40" Margin="2,0,0,0"
+                        Click="btnAbout_Click"/>
                 </StackPanel>
             </Grid>
         </Border>

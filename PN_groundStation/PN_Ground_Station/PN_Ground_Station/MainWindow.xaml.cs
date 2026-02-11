@@ -71,7 +71,7 @@ namespace PN_Ground_Station
                 System.Diagnostics.Debug.WriteLine($"CameraWindow created: {_cameraWindow != null}");
 
                 System.Diagnostics.Debug.WriteLine("Creating ControlsWindow...");
-                _controlsWindow = new ControlsWindow();
+                _controlsWindow = new ControlsWindow(_tcpClient);
                 System.Diagnostics.Debug.WriteLine($"ControlsWindow created: {_controlsWindow != null}");
 
                 // Clear any existing content
@@ -137,7 +137,7 @@ namespace PN_Ground_Station
                 btnConnect.IsEnabled = false;
                 txtStatusMessage.Text = $"Connecting to {host}:{port}...";
 
-                await _tcpClient.ConnectAsync(host, port);
+                await _tcpClient.ConnectAsync(host,port);
 
                 btnConnect.IsEnabled = false;
                 btnDisconnect.IsEnabled = true;
@@ -210,6 +210,18 @@ namespace PN_Ground_Station
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             _tcpClient?.Dispose();
+        }
+
+        private void btnAbout_Click(object sender, RoutedEventArgs e)
+        {
+            AboutMe aboutWindow = new AboutMe();
+            aboutWindow.Owner = this;
+            aboutWindow.ShowDialog();
+        }
+
+        private void btnSettings_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

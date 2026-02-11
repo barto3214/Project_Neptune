@@ -20,9 +20,13 @@ namespace PN_Ground_Station.DockWindows
     /// </summary>
     public partial class ControlsWindow : UserControl
     {
-        public ControlsWindow()
+        private readonly TcpDataClient _tcpClient;
+        public ControlsWindow(TcpDataClient _tcpClient)
         {
             InitializeComponent();
+            this._tcpClient = _tcpClient;
+            _tcpClient = new TcpDataClient();
+            
         }
 
         public void UpdateLatestData(SensorData data)
@@ -61,6 +65,23 @@ namespace PN_Ground_Station.DockWindows
         {
             MessageBox.Show("Measurement cycle not implemented yet.\nThis feature is under development.",
                 "Not Implemented", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void ScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            ScrollViewer scrollViewer = (ScrollViewer)sender;
+
+            // Zmniejsz czułość - podziel Delta przez większą wartość
+            double scrollAmount = e.Delta / 3.0; // standardowo Delta to około 120
+
+            scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - scrollAmount);
+
+            e.Handled = true; // Zapobiega domyślnemu scrollowaniu
+        }
+
+        private async void btnMeasure_Click(object sender, RoutedEventArgs e)
+        {
+            await _tcpClient.SendCommandAsync("measure",120,0);
         }
     }
 }

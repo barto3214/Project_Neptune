@@ -53,7 +53,7 @@ namespace PN_Ground_Station.DockWindows {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/PN_Ground_Station;component/dock%20windows/chartswindow.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/PN_Ground_Station;V1.0.0.0;component/dock%20windows/chartswindow.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\Dock Windows\ChartsWindow.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);
