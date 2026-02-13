@@ -12,11 +12,17 @@ GND/G → GND
 Do → A0 na ADS1115
 
 
-Czujnik przewodności (EC/TDS):
+Czujnik przewodności (EC/TDS)(czarna sonda):
 
 VCC/V+ → 5V Raspberry Pi
 GND/G → GND
 Wyjście analogowe (A/S/Signal) → A1 na ADS1115
+
+Czujnik TDS → ADS1115(biała sonda):
+
+VCC (czerwony) → 5V Raspberry Pi
+GND (czarny) → GND
+A/SIG (niebieski) → A2 na ADS1115
 
 
 
