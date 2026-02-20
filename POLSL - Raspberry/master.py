@@ -40,7 +40,7 @@ from dataclasses import dataclass
 
 
 # Konfiguracja Serial
-SERIAL_PORT = '/dev/ttyACM0'  # Arduino przez USB
+SERIAL_PORT = '/dev/ttyUSB0'  # Arduino przez USB
 
 # SERIAL_PORT = '/dev/serial0'  # UART (GPIO 14/15)
 SERIAL_BAUD = 115200
@@ -80,12 +80,23 @@ measurement_start_time = 0
 measurement_duration = 0
 last_measurement = 0
 MEASUREMENT_INTERVAL = 2  # Sekund między pomiarami
+last_measure_time = 0  
+
 
 # Stan pompy
 pump_state = False
 
 # Serial connection
 ser = None
+
+ser = None
+
+sensor_data = {           # ← TO BRAKUJE
+    'ph': 0.0,
+    'tds': 0.0,
+    'temperature': 0.0,
+    'conductivity': 0.0,
+}
 
 @dataclass
 class SensorData:
@@ -96,13 +107,13 @@ class SensorData:
     
     
     def voltage_to_ph(voltage):
-    return slope_ph * voltage + offset_ph
+        return slope_ph * voltage + offset_ph
 
     def read_ph_avg(samples=20):
         """Pobierz 20 próbek, odrzuć 20% skrajnych, uśrednij resztę"""
         readings = []
         for _ in range(samples):
-            readings.append(voltage_to_ph(chan_ph.voltage))
+            readings.append(SensorData.voltage_to_ph(chan_ph.voltage))
             time.sleep(0.05)
         readings.sort()
         # Odrzuć 20% z góry i z dołu (po 4 wartości)
@@ -122,7 +133,7 @@ class SensorData:
     def read_ec_avg(samples=10):
         readings = []
         for _ in range(samples):
-            readings.append(voltage_to_ec(chan_ec.voltage))
+            readings.append(SensorData.voltage_to_ec(chan_ec.voltage))
             time.sleep(0.02)
         readings.sort()
         trimmed = readings[1:-1]
@@ -131,12 +142,13 @@ class SensorData:
     def find_sensor():
         devices = glob.glob('/sys/bus/w1/devices/28*')
         if devices:
-            print(f"Znaleziono czujnik temp: {devices[0].split('/')[-1]}")
+            # print(f"Znaleziono czujnik temp: {devices[0].split('/')[-1]}")
             return devices[0] + '/w1_slave'
         print("Temp czujnik: BRAK - sprawdź połączenie GPIO4 i 1-Wire!")
         return None
     
     def read_temp(retries=5):
+        device_file = SensorData.find_sensor()
         if device_file is None:
             return None
         for attempt in range(retries):
@@ -196,16 +208,14 @@ def init_serial():
         return False
 
 def read_sensors():
-    sensor_data['ph'] = 7.2 + random.uniform(-0.1, 0.1)
-    sensor_data['tds'] = 350 + random.uniform(-20, 20)
-    sensor_data['temperature'] = 22.5 + random.uniform(-0.5, 0.5)
-    sensor_data['conductivity'] = 700 + random.uniform(-50, 50)
-    
-    # TODO: Prawdziwe czytanie czujników:
-    # sensor_data['ph'] = read_ph_sensor()
-    # sensor_data['tds'] = read_tds_sensor()
-    # sensor_data['temperature'] = read_ds18b20()
-    # sensor_data['conductivity'] = sensor_data['tds'] * 2.0
+    temp = SensorData.read_temp()
+    sensor_data['ph']           = SensorData.read_ph_avg()
+    sensor_data['temperature']  = temp
+    sensor_data['conductivity'] = SensorData.read_ec_avg()
+    sensor_data['tds']          = SensorData.voltage_to_tds(
+                                      chan_tds.voltage,
+                                      temp if temp is not None else 25.0
+                                  )
 
 def control_pump(state, GPIO=None):
     """Sterowanie pompą"""
@@ -247,26 +257,34 @@ def send_status():
 
 def process_command(command, GPIO=None):
     """Przetwórz komendę z Arduino"""
-    global measuring, measurement_start_time, measurement_duration
+    global measuring, measurement_start_time, measurement_duration, last_measure_time
     
     command = command.strip().upper()
     
-    # DODAJ TE LINIE NA POCZĄTKU:
-    # Ignoruj debug logi z Arduino
-    if command.startswith("TX DATA") or command.startswith("RX COMMAND") or \
-       command.startswith("[DEBUG]") or command.startswith("==="):
-        return  # Ignoruj debug output
-    
+    # Ignoruj debug logi i komunikaty startowe z Arduino
+    IGNORED_PREFIXES = (
+        "TX DATA", "RX COMMAND", "[DEBUG]", "===",
+        "SYSTEM", "NASŁUCHIWANIE", "STACJA", "ARDUINO",
+        "INICJALIZACJA", "GOTOWY", "START",
+    )
+    if any(command.startswith(prefix) for prefix in IGNORED_PREFIXES):
+        return
+
     if command.startswith("MEASURE:"):
-        # Format: MEASURE:120 (120 sekund)
         try:
             duration = int(command.split(':')[1])
+            
+            # DEBOUNCING - ignoruj jeśli ostatnia komenda <3s temu
+            if time.time() - last_measure_time < 3:
+                return  # cicho ignoruj, nie printuj
+            
+            last_measure_time = time.time()
             measuring = True
             measurement_start_time = time.time()
             measurement_duration = duration
             print(f"START pomiaru przez {duration}s")
-        except:
-            print(f"Błąd parsowania: {command}")
+        except ValueError:
+            print(f"Nieprawidłowa komenda MEASURE: {command}")
     
     elif command == "STOP":
         measuring = False
@@ -280,12 +298,18 @@ def process_command(command, GPIO=None):
     
     elif command == "STATUS":
         send_status()
-    
+        
+    # elif command == "GET_DATA":
+    #     read_sensors()
+    #     send_data()
     elif command == "GET_DATA":
         if measuring:
+            # print("Czytam czujniki...")   # ← debug
             read_sensors()
+            # print(f"Dane: {sensor_data}") # ← debug
             send_data()
-        # Jesli pomiar nieaktywny - ignoruj GET_DATA
+    #     else:
+    #         print("GET_DATA zignorowane - pomiar nieaktywny")  # ← debug
     
     else:
         print(f"Nieznana komenda: {command}")
@@ -296,6 +320,7 @@ def send_stop_to_arduino():
         try:
             ser.write(b"MEASUREMENT_DONE\n")
             ser.flush()
+            time.sleep(0.5)  # ← DODAJ - daj Arduino czas na odczyt
             print("Wyslano MEASUREMENT_DONE do Arduino")
         except Exception as e:
             print(f"Blad wysylania STOP: {e}")
@@ -303,22 +328,25 @@ def send_stop_to_arduino():
             
 def measurement_loop(GPIO=None):
     """Pętla pomiaru - wykonuje pomiary gdy measuring=True"""
-    global last_measurement,measuring
+    global last_measurement, measuring
     
     while True:
         if measuring:
-            # Sprawdź czy minął czas pomiaru
             elapsed = time.time() - measurement_start_time
             if elapsed >= measurement_duration:
                 print(f"Koniec pomiaru ({measurement_duration}s)")
                 measuring = False
+                send_stop_to_arduino()
                 continue
             
-            # Wykonaj pomiar co MEASUREMENT_INTERVAL sekund
             if time.time() - last_measurement >= MEASUREMENT_INTERVAL:
                 print(f"Pomiar ({elapsed:.0f}/{measurement_duration}s)...")
-                read_sensors()
-                send_data()
+                try:  # ← DODAJ TRY-CATCH
+                    read_sensors()
+                    send_data()
+                except Exception as e:  # ← ŁAPIE WSZYSTKIE BŁĘDY I2C
+                    print(f"[ERROR] Błąd odczytu czujników: {e}")
+                    # Nie crashuj - kontynuuj pomiar
                 last_measurement = time.time()
         
         time.sleep(0.1)

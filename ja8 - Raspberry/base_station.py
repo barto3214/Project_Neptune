@@ -404,7 +404,7 @@ class TCPServer:
                     line, buffer = buffer.split(b'\n', 1)
                     
                     try:
-                        message = json.loads(line.decode('utf-8'))
+                        message = json.loads(line.decode('utf-8-sig').strip())
                         self.process_command(message, client_socket)
                     except json.JSONDecodeError:
                         print(f"Błąd parsowania JSON: {line}")
