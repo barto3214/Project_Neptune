@@ -37,6 +37,7 @@ from adafruit_extended_bus import ExtendedI2C as I2C
 from adafruit_ads1x15.ads1115 import ADS1115
 from adafruit_ads1x15.analog_in import AnalogIn
 from dataclasses import dataclass
+import db_manager 
 
 
 # Konfiguracja Serial
@@ -216,6 +217,13 @@ def read_sensors():
                                       chan_tds.voltage,
                                       temp if temp is not None else 25.0
                                   )
+    db_manager.add_measurement(
+    time.time(),
+    round(sensor_data['ph'], 2),
+    round(sensor_data['tds'], 2),
+    round(sensor_data['temperature'], 2),
+    round(sensor_data['conductivity'], 2)
+    )
 
 def control_pump(state, GPIO=None):
     """Sterowanie pompą"""
@@ -418,6 +426,11 @@ def main():
     measurement_thread = threading.Thread(target=measurement_loop, args=(GPIO,))
     measurement_thread.daemon = True
     measurement_thread.start()
+    
+    db_manager.init_database()  # Inicjalizacja bazy danych
+    db_thread = threading.Thread(target=db_manager.database_worker)
+    db_thread.daemon = True
+    db_thread.start()
     
     try:
         # Główna pętla (keep alive)
