@@ -78,9 +78,6 @@
                 <DataGridTextColumn Header="Battery (V)" 
                                     Binding="{Binding BatteryVoltage, StringFormat=F2}" 
                                     Width="90"/>
-                <DataGridTextColumn Header="Quality" 
-                                    Binding="{Binding WaterQuality}" 
-                                    Width="*"/>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

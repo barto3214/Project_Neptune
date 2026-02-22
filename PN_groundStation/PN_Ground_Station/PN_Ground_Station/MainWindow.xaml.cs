@@ -174,8 +174,8 @@ namespace PN_Ground_Station
                 _packetCount++;
                 _dataHistory.Add(data);
 
-                // Keep only last 100 records
-                if (_dataHistory.Count > 100)
+                // Keep only last 50 records for charts
+                if (_dataHistory.Count > 50)
                     _dataHistory.RemoveAt(0);
 
                 // Update status bar

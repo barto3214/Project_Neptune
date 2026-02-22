@@ -22,6 +22,7 @@ namespace PN_Ground_Station.DockWindows
     public partial class DataGridWindow : UserControl
     {
         public ObservableCollection<SensorData> DataHistory { get; } = new();
+        
 
         public DataGridWindow()
         {
@@ -34,9 +35,11 @@ namespace PN_Ground_Station.DockWindows
             // Insert at beginning
             DataHistory.Insert(0, data);
 
-            // Keep only last 100
-            if (DataHistory.Count > 100)
+            // Keep only last 150 records
+            if (DataHistory.Count > 150)
                 DataHistory.RemoveAt(DataHistory.Count - 1);
+
+
         }
 
         public void ClearData()

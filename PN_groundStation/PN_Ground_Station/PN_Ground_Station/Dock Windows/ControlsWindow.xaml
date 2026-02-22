@@ -142,7 +142,7 @@
                         <Run Text="Communication: "/><Run Text="NRF905 (433MHz)" Foreground="#CCCCCC"/>
                     </TextBlock>
                     <TextBlock Foreground="#999999" TextWrapping="Wrap" Margin="0,5,0,0">
-                        <Run Text="Version: "/><Run Text="1.0.0-beta" Foreground="#CCCCCC"/>
+                        <Run Text="Version: "/><Run Text="1.1.0" Foreground="#CCCCCC"/>
                     </TextBlock>
                 </StackPanel>
             </Border>
