@@ -14,6 +14,17 @@
  * Arduino TX  -> RPi RX (GPIO 15, Pin 10)
  * Arduino RX  -> RPi TX (GPIO 14, Pin 8)
  * GND         -> GND
+ *
+ * Cytron MDD20A (sterowanie łódką):
+ * CH1 PWM  -> D3   (lewy silnik, prędkość)
+ * CH1 DIR  -> D2   (lewy silnik, kierunek)
+ * CH2 PWM  -> D6   (prawy silnik, prędkość)
+ * CH2 DIR  -> D4   (prawy silnik, kierunek)
+ *
+ * Sterowanie WSAD przez NRF905:
+ * CMD_BOAT_DRIVE (0x20): param1=lewy, param2=prawy
+ * Prędkość: 0=pełny wstecz, 100=stop, 200=pełny przód
+ * Watchdog: brak komendy przez 500ms = automatyczny STOP
  */
 
 #include <SPI.h>
@@ -34,11 +45,14 @@
 #define CMD_R_RX_PAYLOAD 0x24
 
 // Command codes (od RPi#1)
-#define CMD_MEASURE_START  0x01
-#define CMD_MEASURE_STOP   0x02
-#define CMD_PUMP_ON        0x03
-#define CMD_PUMP_OFF       0x04
-#define CMD_STATUS_REQUEST 0x05
+#define CMD_MEASURE_START   0x01
+#define CMD_MEASURE_STOP    0x02
+#define CMD_PUMP_ON         0x03  // Pompa 1 ON  (napełnianie zbiornika)
+#define CMD_PUMP_OFF        0x04  // Pompa 1 OFF
+#define CMD_STATUS_REQUEST  0x05
+#define CMD_SAMPLES_LOADING 0x06  // Sekwencja ładowania próbki (pompa 2)
+#define CMD_REJECT_SAMPLE   0x07  // Odrzut próbki - opróżnianie (pompa 2)
+#define CMD_BOAT_DRIVE      0x20  // Napęd łódki: param1=lewy(0-200), param2=prawy(0-200), 100=stop
 
 // Packet types (do RPi#1)
 #define PACKET_DATA   0x10
@@ -46,6 +60,14 @@
 
 // SPI Settings
 SPISettings nrf905_spi(200000, MSBFIRST, SPI_MODE0);
+
+// ─── PINY SILNIKÓW (Cytron MDD20A) ───────────────────────────────────────────
+#define MOTOR_LEFT_PWM  3   // D3  - lewy silnik prędkość (PWM)
+#define MOTOR_LEFT_DIR  2   // D2  - lewy silnik kierunek
+#define MOTOR_RIGHT_PWM 6   // D6  - prawy silnik prędkość (PWM)
+#define MOTOR_RIGHT_DIR 4   // D4  - prawy silnik kierunek
+
+
 
 // Command packet (32 bajty - odbierane z RPi#1)
 struct CommandPacket {
@@ -82,6 +104,8 @@ const unsigned long DATA_TRANSMIT_INTERVAL = 2000;  // co 2s
 uint32_t rxCount = 0;
 uint32_t txCount = 0;
 bool autoMode = true;
+unsigned long lastBoatCommand = 0;  // Watchdog: czas ostatniej komendy WSAD
+const unsigned long BOAT_WATCHDOG_MS = 500;  // STOP jeśli brak komendy przez 500ms
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -95,6 +119,15 @@ void setup() {
   pinMode(NRF905_PWR,   OUTPUT);
   pinMode(NRF905_TX_EN, OUTPUT);
   pinMode(NRF905_DR,    INPUT);
+  pinMode(LED_BUILTIN,  OUTPUT);
+
+  // Inicjalizacja silników
+  pinMode(MOTOR_LEFT_PWM,  OUTPUT);
+  pinMode(MOTOR_LEFT_DIR,  OUTPUT);
+  pinMode(MOTOR_RIGHT_PWM, OUTPUT);
+  pinMode(MOTOR_RIGHT_DIR, OUTPUT);
+  setMotor(MOTOR_LEFT_PWM,  MOTOR_LEFT_DIR,  0);
+  setMotor(MOTOR_RIGHT_PWM, MOTOR_RIGHT_DIR, 0);
 
   digitalWrite(NRF905_CSN,   HIGH);
   digitalWrite(NRF905_CE,    LOW);
@@ -140,6 +173,13 @@ void loop() {
   // ODBIERANIE DANYCH z RPi#2 przez Serial
   if (Serial.available() > 0) {
     processSerialData();
+  }
+
+  // WATCHDOG ŁÓDKI — brak komendy przez 500ms = STOP
+  if (lastBoatCommand > 0 && millis() - lastBoatCommand >= BOAT_WATCHDOG_MS) {
+    setMotor(MOTOR_LEFT_PWM,  MOTOR_LEFT_DIR,  0);
+    setMotor(MOTOR_RIGHT_PWM, MOTOR_RIGHT_DIR, 0);
+    lastBoatCommand = 0;  // Resetuj żeby nie spamować
   }
 }
 
@@ -275,6 +315,24 @@ void processCommand(uint8_t cmd, uint16_t param1, uint16_t param2) {
     case CMD_STATUS_REQUEST:
       Serial.println(F("STATUS"));
       break;
+
+    case CMD_SAMPLES_LOADING:           // ← NOWE
+      Serial.println(F("SAMPLES_LOADING"));
+      break;
+
+    case CMD_REJECT_SAMPLE:             // ← NOWE
+      Serial.println(F("REJECT_SAMPLE"));
+      break;
+
+    case CMD_BOAT_DRIVE: {
+      // param1=lewy(0-200), param2=prawy(0-200), 100=zatrzymanie
+      int leftSpeed  = (int)param1 - 100;  // -100..+100
+      int rightSpeed = (int)param2 - 100;  // -100..+100
+      setMotor(MOTOR_LEFT_PWM,  MOTOR_LEFT_DIR,  leftSpeed);
+      setMotor(MOTOR_RIGHT_PWM, MOTOR_RIGHT_DIR, rightSpeed);
+      lastBoatCommand = millis();  // Odśwież watchdog
+      break;
+    }
   }
 }
 
@@ -363,6 +421,20 @@ void transmitData() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Ustaw silnik: speed -100..+100 (0=stop, +100=pełny przód, -100=pełny wstecz)
+void setMotor(uint8_t pwmPin, uint8_t dirPin, int speed) {
+  if (speed > 0) {
+    digitalWrite(dirPin, HIGH);
+    analogWrite(pwmPin, map(speed, 0, 100, 0, 255));
+  } else if (speed < 0) {
+    digitalWrite(dirPin, LOW);
+    analogWrite(pwmPin, map(-speed, 0, 100, 0, 255));
+  } else {
+    analogWrite(pwmPin, 0);
+  }
+}
 
 uint8_t calculateCRC(uint8_t* data, uint16_t length) {
   uint8_t crc = 0xFF;

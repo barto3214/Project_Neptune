@@ -21,7 +21,6 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-
                         <TextBlock Grid.Column="0" Text="pH:" Foreground="#999999" FontWeight="Bold"/>
                         <TextBlock x:Name="txtPh" Grid.Column="1" Text="--" 
                                    Foreground="#CCCCCC" FontSize="20" FontWeight="Bold"/>
@@ -36,7 +35,6 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-
                         <TextBlock Grid.Column="0" Text="TDS:" Foreground="#999999" FontWeight="Bold"/>
                         <TextBlock x:Name="txtTds" Grid.Column="1" Text="--" 
                                    Foreground="#CCCCCC" FontSize="20" FontWeight="Bold"/>
@@ -51,7 +49,6 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-
                         <TextBlock Grid.Column="0" Text="Temperature:" Foreground="#999999" FontWeight="Bold"/>
                         <TextBlock x:Name="txtTemp" Grid.Column="1" Text="--" 
                                    Foreground="#CCCCCC" FontSize="20" FontWeight="Bold"/>
@@ -66,7 +63,6 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-
                         <TextBlock Grid.Column="0" Text="Conductivity:" Foreground="#999999" FontWeight="Bold"/>
                         <TextBlock x:Name="txtCond" Grid.Column="1" Text="--" 
                                    Foreground="#CCCCCC" FontSize="20" FontWeight="Bold"/>
@@ -83,7 +79,6 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-
                         <TextBlock Grid.Column="0" Text="Battery:" Foreground="#999999" FontWeight="Bold"/>
                         <TextBlock x:Name="txtBattery" Grid.Column="1" Text="--" 
                                    Foreground="#CCCCCC" FontSize="18" FontWeight="Bold"/>
@@ -97,7 +92,6 @@
                             <ColumnDefinition Width="120"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-
                         <TextBlock Grid.Column="0" Text="Water Quality:" Foreground="#999999" FontWeight="Bold"/>
                         <TextBlock x:Name="txtQuality" Grid.Column="1" Text="--" 
                                    Foreground="#00D000" FontSize="16" FontWeight="Bold"/>
@@ -109,18 +103,74 @@
             <Border Background="#252526" BorderBrush="#3F3F46" BorderThickness="1" 
                     Padding="15" Margin="0,0,0,15">
                 <StackPanel>
-                    <TextBlock Text="💧 Remote control" 
+                    <TextBlock Text="💧 Water control" 
                                Foreground="#CCCCCC" FontSize="16" FontWeight="Bold"
                                Margin="0,0,0,15"/>
 
-                    <Button Content="Measure" x:Name="btnMeasure" Height="40" 
-                    Margin="0,5" Click="btnMeasure_Click"  IsEnabled="True"/>
-                    <Button Content="Start Intake Pump" Height="40" 
-                            Margin="0,5" Click="BtnStartPump_Click" IsEnabled="False"/>
-                    <Button Content="Start Discharge Pump" Height="40" 
-                            Margin="0,5" Click="BtnStopPump_Click" IsEnabled="False"/>
-                    <Button Content="Start Measurement Cycle" Height="40" 
-                            Margin="0,5" Click="BtnStartCycle_Click" IsEnabled="False"/>
+                    <Button Content="Start pump 1 (external)" Height="40" 
+                            Margin="0,5" Click="BtnStartPump_Click"/>
+                    <Button Content="Stop pump 1 (external)" Height="40" 
+                            Margin="0,5" Click="BtnStopPump_Click"/>
+                    <Button Content="Start Measuring cycle" x:Name="btnMeasure" Height="40" 
+                            Margin="0,5" Click="btnStartMeasurementCycle_Click"/>
+                    <Button Content="Start Loading Cycle (1 test-tube)" Height="40" 
+                            Margin="0,5" Click="BtnStartLoadingCycle_Click"/>
+                    <Button Content="Start rejecting water by pump 2 (internal)" Height="40" 
+                            Margin="0,5" Click="btnStartRejectingCycle_Click"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Boat Control Section -->
+            <Border Background="#252526" BorderBrush="#3F3F46" BorderThickness="1" 
+                    Padding="15" Margin="0,0,0,15">
+                <StackPanel>
+                    <TextBlock Text="🚤 Boat Control" 
+                               Foreground="#CCCCCC" FontSize="16" FontWeight="Bold"
+                               Margin="0,0,0,15"/>
+
+                    <!-- Status -->
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Status: " Foreground="#999999" FontWeight="Bold"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock x:Name="txtBoatStatus" Grid.Column="1"
+                                   Text="● INACTIVE" Foreground="#FF4444"
+                                   FontWeight="Bold" VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <!-- Activate/Deactivate -->
+                    <Button x:Name="btnBoatToggle"
+                            Content="▶  Activate WSAD Control"
+                            Height="40" Margin="0,5"
+                            Background="#007ACC" Foreground="White" FontWeight="Bold"
+                            Click="BtnBoatToggle_Click"/>
+
+                    <Separator Background="#3F3F46" Margin="0,10"/>
+
+                    <!-- Keymap info -->
+                    <TextBlock Foreground="#666666" FontSize="11" Margin="0,0,0,4"
+                               Text="Keyboard layout (focus on this panel first):"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Foreground="#999999" FontSize="11" Text="W — forward"/>
+                            <TextBlock Foreground="#999999" FontSize="11" Text="S — reverse"/>
+                            <TextBlock Foreground="#999999" FontSize="11" Text="A — pivot left"/>
+                            <TextBlock Foreground="#999999" FontSize="11" Text="D — pivot right"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Foreground="#999999" FontSize="11" Text="W+A — arc left"/>
+                            <TextBlock Foreground="#999999" FontSize="11" Text="W+D — arc right"/>
+                            <TextBlock Foreground="#999999" FontSize="11" Text="S+A/S+D — reverse arc"/>
+                            <TextBlock Foreground="#FF4444" FontSize="11" FontWeight="Bold" Text="SPACE — emergency stop"/>
+                        </StackPanel>
+                    </Grid>
                 </StackPanel>
             </Border>
 
@@ -131,7 +181,6 @@
                     <TextBlock Text="ℹ️ System Information" 
                                Foreground="#CCCCCC" FontSize="16" FontWeight="Bold"
                                Margin="0,0,0,15"/>
-
                     <TextBlock Foreground="#999999" TextWrapping="Wrap">
                         <Run Text="Station Type: "/><Run Text="Water Quality Monitor" Foreground="#CCCCCC" FontWeight="Bold"/>
                     </TextBlock>
@@ -142,10 +191,11 @@
                         <Run Text="Communication: "/><Run Text="NRF905 (433MHz)" Foreground="#CCCCCC"/>
                     </TextBlock>
                     <TextBlock Foreground="#999999" TextWrapping="Wrap" Margin="0,5,0,0">
-                        <Run Text="Version: "/><Run Text="1.1.0" Foreground="#CCCCCC"/>
+                        <Run Text="Version: "/><Run Text="1.2.0" Foreground="#CCCCCC"/>
                     </TextBlock>
                 </StackPanel>
             </Border>
+
         </StackPanel>
     </ScrollViewer>
 </UserControl>

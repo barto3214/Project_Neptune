@@ -33,7 +33,24 @@ Czerwony (VCC) → 3.3V Raspberry Pi
 Czarny (GND) → GND 
 Zielony (DATA) → GPIO4 (pin 7)
 
+Silnik krokowy 28BYJ-48 + sterownik ULN2003:
+IN1 → GPIO 17 (pin 11)
+IN2 → GPIO 27 (pin 13)
+IN3 → GPIO 22 (pin 15)
+IN4 → GPIO 23 (pin 16)
+VCC → 5V Raspberry Pi
+GND → GND
 
+Servo MG995:
+VCC (czerwony) → zewnętrzne 5V (NIE z pinu RPi - za duży prąd!)
+GND (brązowy) → GND (wspólna masa z RPi)
+SIG (pomarańczowy) → GPIO 18 (pin 12, PWM)
+
+Przekaźniki pomp:
+Pompa 1 (napełnianie zbiornika) IN → GPIO 24 (pin 18)
+Pompa 2 (próbówki)             IN → GPIO 25 (pin 22)
+VCC → 5V Raspberry Pi
+GND → GND
 
 ┌──────────────────────────────────────────────────────────┐
 │           RASPBERRY PI 4          →        nRF905        					│
@@ -71,6 +88,24 @@ Zielony (DATA) → GPIO4 (pin 7)
 └──────────────────────────────────────────────────────────┘
 
 ZAJĘTE PINY RPi: 10 pinów fizycznych
+
+┌──────────────────────────────────────────────────────────┐
+│           Arduino Nano (łódka)    →     Cytron MDD20A    					│
+├──────────────────────────────────────────────────────────┤
+│ D2                                →  CH1 DIR (lewy)     					│
+│ D3  (PWM)                         →  CH1 PWM (lewy)      					│
+│ D4                                →  CH2 DIR (prawy)     					│
+│ D6  (PWM)                         →  CH2 PWM (prawy)     					│
+│ GND                               →  GND                 					│
+│ B+/B- MDD20A → akumulator łódki (7-30V)                  					│
+│ M1A/M1B      → lewy silnik                               					│
+│ M2A/M2B      → prawy silnik                              					│
+│                                                          					│
+│ + nRF905 podłączony po usb  												│
+└──────────────────────────────────────────────────────────┘
+
+ZAJĘTE PINY RPi #2: GPIO 2,3,4,17,18,22,23,24,25,27 + USB
+ZAJĘTE PINY RPi #1: GPIO 8,9,10,11,17,22,27
 
 
 

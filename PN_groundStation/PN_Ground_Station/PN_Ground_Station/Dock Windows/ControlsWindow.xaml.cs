@@ -1,87 +1,94 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace PN_Ground_Station.DockWindows
 {
-    /// <summary>
-    /// Logika interakcji dla klasy ControlsWindow.xaml
-    /// </summary>
     public partial class ControlsWindow : UserControl
     {
         private readonly TcpDataClient _tcpClient;
-        public ControlsWindow(TcpDataClient _tcpClient)
+        private readonly BoatController _boat;
+
+        public ControlsWindow(TcpDataClient tcpClient)
         {
             InitializeComponent();
-            this._tcpClient = _tcpClient;
-            _tcpClient = new TcpDataClient();
-            
+            _tcpClient = tcpClient;                 
+            _boat = new BoatController(_tcpClient);
+
+            // Klawiatura — UserControl musi być focusable
+            this.Focusable = true;
+            this.KeyDown += _boat.OnKeyDown;
+            this.KeyUp += _boat.OnKeyUp;
+
+            // aktywuje klawiaturę
+            this.MouseDown += (s, e) => this.Focus();
         }
+
+        // ── Czujniki ─────────────────────────────────────────────────────────
 
         public void UpdateLatestData(SensorData data)
         {
             txtPh.Text = data.Ph.ToString("F2");
             txtPhStatus.Text = data.GetPhStatus();
-
             txtTds.Text = data.Tds.ToString("F1");
             txtTdsUnit.Text = "ppm";
-
             txtTemp.Text = data.Temperature.ToString("F1");
             txtTempUnit.Text = "°C";
-
             txtCond.Text = data.Conductivity.ToString("F0");
             txtCondUnit.Text = "µS/cm";
-
             txtBattery.Text = data.BatteryVoltage.ToString("F2");
             txtBatteryUnit.Text = "V";
-
             txtQuality.Text = data.GetWaterQuality();
         }
 
-        private void BtnStartPump_Click(object sender, RoutedEventArgs e)
+        // ── Pompy / Pomiary ───────────────────────────────────────────────────
+
+        private async void BtnStartPump_Click(object sender, RoutedEventArgs e)
+            => await _tcpClient.SendCommandAsync("pump_on", 0, 0);
+
+        private async void BtnStopPump_Click(object sender, RoutedEventArgs e)
+            => await _tcpClient.SendCommandAsync("pump_off", 0, 0);
+
+        private async void BtnStartLoadingCycle_Click(object sender, RoutedEventArgs e)
+            => await _tcpClient.SendCommandAsync("samples_loading", 0, 0);
+
+        private async void btnStartMeasurementCycle_Click(object sender, RoutedEventArgs e)
+            => await _tcpClient.SendCommandAsync("measure", 120, 0);
+
+        private async void btnStartRejectingCycle_Click(object sender, RoutedEventArgs e)
+            => await _tcpClient.SendCommandAsync("reject_sample", 0, 0);
+
+        // ── Sterowanie łódką ─────────────────────────────────────────────────
+
+        private void BtnBoatToggle_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Pump control not implemented yet.\nThis feature is under development.",
-                "Not Implemented", MessageBoxButton.OK, MessageBoxImage.Information);
+            if (_boat.IsActive)
+            {
+                _boat.Deactivate();
+                btnBoatToggle.Content = "▶  Activate WSAD Control";
+                btnBoatToggle.Background = System.Windows.Media.Brushes.DarkRed;
+                txtBoatStatus.Text = "● INACTIVE";
+                txtBoatStatus.Foreground = System.Windows.Media.Brushes.OrangeRed;
+            }
+            else
+            {
+                _boat.Activate();
+                this.Focus();  // Daj focus żeby klawiatura działała od razu
+                btnBoatToggle.Content = "⏹  Deactivate WSAD Control";
+                btnBoatToggle.Background = System.Windows.Media.Brushes.DarkGreen;
+                txtBoatStatus.Text = "● ACTIVE — use WSAD to steer";
+                txtBoatStatus.Foreground = System.Windows.Media.Brushes.LimeGreen;
+            }
         }
 
-        private void BtnStopPump_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("Pump control not implemented yet.\nThis feature is under development.",
-                "Not Implemented", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
-
-        private void BtnStartCycle_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("Measurement cycle not implemented yet.\nThis feature is under development.",
-                "Not Implemented", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
+        // ── Scroll ───────────────────────────────────────────────────────────
 
         private void ScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
-            ScrollViewer scrollViewer = (ScrollViewer)sender;
-
-            // Zmniejsz czułość - podziel Delta przez większą wartość
-            double scrollAmount = e.Delta / 3.0; // standardowo Delta to około 120
-
-            scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - scrollAmount);
-
-            e.Handled = true; // Zapobiega domyślnemu scrollowaniu
-        }
-
-        private async void btnMeasure_Click(object sender, RoutedEventArgs e)
-        {
-            await _tcpClient.SendCommandAsync("measure",120,0);
+            var scrollViewer = (ScrollViewer)sender;
+            scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - e.Delta / 3.0);
+            e.Handled = true;
         }
     }
 }

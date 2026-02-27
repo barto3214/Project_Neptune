@@ -218,10 +218,5 @@ namespace PN_Ground_Station
             aboutWindow.Owner = this;
             aboutWindow.ShowDialog();
         }
-
-        private void btnSettings_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
     }
 }

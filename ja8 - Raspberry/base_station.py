@@ -38,11 +38,14 @@ CMD_R_TX_ADDRESS = 0x23
 CMD_R_RX_PAYLOAD = 0x24
 
 # Command codes (wysyłane do Arduino)
-CMD_MEASURE_START = 0x01  # Rozpocznij pomiar przez 2 minuty
-CMD_MEASURE_STOP = 0x02   # Zatrzymaj pomiar
-CMD_PUMP_ON = 0x03        # Włącz pompę
-CMD_PUMP_OFF = 0x04       # Wyłącz pompę
-CMD_STATUS_REQUEST = 0x05 # Zapytaj o status
+CMD_MEASURE_START   = 0x01  # Rozpocznij pomiar
+CMD_MEASURE_STOP    = 0x02  # Zatrzymaj pomiar
+CMD_PUMP_ON         = 0x03  # Włącz pompę 1 (napełnianie zbiornika)
+CMD_PUMP_OFF        = 0x04  # Wyłącz pompę 1
+CMD_STATUS_REQUEST  = 0x05  # Zapytaj o status
+CMD_SAMPLES_LOADING = 0x06  # Sekwencja ładowania próbki (pompa 2)
+CMD_REJECT_SAMPLE   = 0x07  # Odrzut próbki (pompa 2)
+CMD_BOAT_DRIVE      = 0x20  # Napęd łódki: param1=lewy(0-200), param2=prawy(0-200)
 
 # Packet types (odbierane z Arduino)
 PACKET_DATA = 0x10        # Dane z czujników
@@ -420,11 +423,13 @@ class TCPServer:
     def process_command(self, message, client_socket):
         """Przetwórz komendę z WPF i wyślij do Arduino"""
         command = message.get('command', '').lower()
-        
-        print(f"📨 Otrzymano komendę z WPF: {command}")
+        param1  = message.get('param1', 0)
+        param2  = message.get('param2', 0)
+
+        print(f"📨 Otrzymano komendę z WPF: {command} (p1={param1}, p2={param2})")
         
         if command == 'measure':
-            duration = message.get('duration', 120)  # Domyślnie 2 minuty
+            duration = message.get('duration', 120)
             self.transceiver.transmit_command(CMD_MEASURE_START, duration, 0)
             response = {'status': 'ok', 'message': f'Measurement started for {duration}s'}
             
@@ -434,15 +439,31 @@ class TCPServer:
             
         elif command == 'pump_on':
             self.transceiver.transmit_command(CMD_PUMP_ON)
-            response = {'status': 'ok', 'message': 'Pump ON'}
+            response = {'status': 'ok', 'message': 'Pump 1 ON'}
             
         elif command == 'pump_off':
             self.transceiver.transmit_command(CMD_PUMP_OFF)
-            response = {'status': 'ok', 'message': 'Pump OFF'}
+            response = {'status': 'ok', 'message': 'Pump 1 OFF'}
             
         elif command == 'status':
             self.transceiver.transmit_command(CMD_STATUS_REQUEST)
             response = {'status': 'ok', 'message': 'Status request sent'}
+
+        elif command == 'samples_loading':
+            self.transceiver.transmit_command(CMD_SAMPLES_LOADING)
+            response = {'status': 'ok', 'message': 'Samples loading sequence started'}
+
+        elif command == 'reject_sample':
+            self.transceiver.transmit_command(CMD_REJECT_SAMPLE)
+            response = {'status': 'ok', 'message': 'Reject sample sequence started'}
+
+        elif command == 'boat_drive':
+            # param1 = lewy silnik (0-200, 100=stop)
+            # param2 = prawy silnik (0-200, 100=stop)
+            left  = max(0, min(200, int(param1)))
+            right = max(0, min(200, int(param2)))
+            self.transceiver.transmit_command(CMD_BOAT_DRIVE, left, right)
+            response = {'status': 'ok', 'message': f'Boat drive: L={left} R={right}'}
             
         else:
             response = {'status': 'error', 'message': f'Unknown command: {command}'}
@@ -458,7 +479,6 @@ class TCPServer:
         if sensor_data:
             json_data = json.dumps(sensor_data.to_dict()) + '\n'
             
-            # DEBUG
             print(f"📊 broadcast_data() wywołana - Klientów: {len(self.clients)}")
             
             if len(self.clients) == 0:
