@@ -64,7 +64,7 @@ GND → GND
 │ PIN 11  (GPIO17)                  →  CE                  					|
 │ PIN 17  (3.3V)                    →  PWR ✓ (na stałe)    					│
 │ PIN 13  (GPIO27)                  →  TX_EN               					│
-│                                      DR (nie podłączony)  				│
+│ PIN 15  (GPIO22)                  →  DR 									│
 │                                      ANT (antena SMA)     				│
 └──────────────────────────────────────────────────────────┘
 

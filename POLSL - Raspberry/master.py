@@ -6,6 +6,7 @@ Funkcje:
 2. Czyta czujniki (pH, TDS, Temp, Conductivity)
 3. Steruje pompą (relay)
 4. Wysyła dane do Arduino przez Serial
+5. Serwuje stream z kamery przez HTTP (MJPEG)
 
 Komunikacja Serial z Arduino:
 - Komendy otrzymywane (z Arduino):
@@ -15,11 +16,17 @@ Komunikacja Serial z Arduino:
   * PUMP_OFF     - wyłącz pompę
   * STATUS       - wyślij status
   * SAMPLES_LOADING - wykonaj sekwencję ładowania próbek
+  * REJECT_SAMPLE   - wykonaj sekwencję odrzutu próbki
   * GET_DATA     - wyślij aktualne dane
 
 - Dane wysyłane (do Arduino):
   * DATA:7.2,350,22.5,700,1\n  (pH,TDS,Temp,Cond,Pump)
   * STATUS:OK,3700,0\n         (Status,BatteryMv,ErrorFlags)
+
+Stream kamery:
+  * http://<IP>:8080/stream    - MJPEG stream dla WPF
+  * http://<IP>:8080/snapshot  - pojedyncza klatka
+  * http://<IP>:8080/          - podgląd w przeglądarce
 """
 
 import serial
@@ -27,6 +34,9 @@ import time
 import threading
 from datetime import datetime
 import glob
+import subprocess
+import socket
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from adafruit_extended_bus import ExtendedI2C as I2C
 from adafruit_ads1x15.ads1115 import ADS1115
 from adafruit_ads1x15.analog_in import AnalogIn
@@ -43,10 +53,10 @@ SERIAL_BAUD = 115200
 # Konfiguracja GPIO (piny)
 PUMP_1_RELAY_PIN = 24  # GPIO 24 dla przekaźnika pompy 1
 PUMP_2_RELAY_PIN = 25  # GPIO 25 dla przekaźnika pompy 2
-PUMP_DURATION = 5.0     # Czas pracy pompy w sekundach do załadunku probówki TODO: USTAWIĆ REALNY
+PUMP_DURATION = 5.0    # Czas pracy pompy w sekundach do załadunku probówki TODO: USTAWIĆ REALNY
 REJECT_POSITION = 0    # Pozycja karuzeli do odrzutu 
-REJECT_PUMP_TIME = 8.0  # Czas pracy pompy przy odrzucaniu próbki (dłużej niż normalny załadunek) TODO: USTAWIĆ REALNY
-PUMP_1_MAX_TIME = 30.0  # Maksymalny czas pracy pompy 1 (safety cutoff)TODO: USTAWIĆ REALNY
+REJECT_PUMP_TIME = 8.0 # Czas pracy pompy przy odrzucaniu próbki (do opróżnienia zbiornika) TODO: USTAWIĆ REALNY
+PUMP_1_MAX_TIME = 30.0 # Maksymalny czas pracy pompy 1 (żeby nie rozsadziło)TODO: USTAWIĆ REALNY
 
 # === I2C ===
 i2c = I2C(1)
@@ -82,6 +92,16 @@ last_measurement = 0
 MEASUREMENT_INTERVAL = 2  # Sekund między pomiarami
 last_measure_time = 0  
 
+
+pump_state = False            # obecny stan pompy (True=ON)
+ser = None                    # obiekt Serial
+sensor_data = {
+    'ph': 0.0,
+    'tds': 0.0,
+    'temperature': 0.0,
+    'conductivity': 0.0,
+}
+
 # === KONFIGURACJA GPIO ===
 
 # Silnik krokowy 28BYJ-48
@@ -97,26 +117,40 @@ SERVO_PIN = 18
 TOTAL_POSITIONS = 6  
 STEPS_PER_POSITION = 44  # Liczba kroków do przesunięcia o jedną pozycję TODO: USTAWIĆ REALNY
 
-# Pozycje servo (dostosuj według potrzeb!)
+# Pozycje servo
 SERVO_UP = 6.0    # Duty cycle % dla pozycji górnej (ok. 90°)TODO: USTAWIĆ REALNY
 SERVO_DOWN = 12.5  # Duty cycle % dla pozycji dolnej (ok. 180°)TODO: USTAWIĆ REALNY
 
-# === INICJALIZACJA GPIO ===
+# ============================================================
+# KONFIGURACJA KAMERY
+# ============================================================
+CAM_ENABLED  = True   # False = wyłącz kamerę jeśli niepodłączona
+CAM_PORT     = 8080
+CAM_WIDTH    = 1280
+CAM_HEIGHT   = 720
+CAM_FPS      = 30
+CAM_QUALITY  = 70     # 0-100, mniej = mniejszy rozmiar
+
+# Globalny bufor kamery
+_frame_lock  = threading.Lock()
+_last_frame  = None
+_frame_event = threading.Event()
+
+# ============================================================
+# INICJALIZACJA GPIO
+# ============================================================
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 
-# Silnik krokowy
 GPIO.setup(STEP_IN1, GPIO.OUT)
 GPIO.setup(STEP_IN2, GPIO.OUT)
 GPIO.setup(STEP_IN3, GPIO.OUT)
 GPIO.setup(STEP_IN4, GPIO.OUT)
 
-# Servo
 GPIO.setup(SERVO_PIN, GPIO.OUT)
-servo_pwm = GPIO.PWM(SERVO_PIN, 50)  # 50 Hz
+servo_pwm = GPIO.PWM(SERVO_PIN, 50)
 servo_pwm.start(0)
 
-# === SEKWENCJA KROKÓW SILNIKA (Half-step) ===
 HALF_STEP_SEQ = [
     [1, 0, 0, 0],
     [1, 1, 0, 0],
@@ -126,61 +160,50 @@ HALF_STEP_SEQ = [
     [0, 0, 1, 1],
     [0, 0, 0, 1],
     [1, 0, 0, 1]
-]   
+]
 
-# Stan pompy
-pump_state = False
-
-# Serial connection
-ser = None
-
-sensor_data = {          
-    'ph': 0.0,
-    'tds': 0.0,
-    'temperature': 0.0,
-    'conductivity': 0.0,
-}
-
-# === STAN SYSTEMU KARUZELI ===
+# ============================================================
+# STAN KARUZELI
+# ============================================================
 class CarouselState:
     def __init__(self):
         self.current_position = 0
-        self.is_busy = False
-        self.lock = threading.Lock()
-        self.needle_down = False
-    
+        self.is_busy          = False
+        self.lock             = threading.Lock()
+        self.needle_down      = False
+
     def get_status(self):
         return {
-            "position": self.current_position,
-            "busy": self.is_busy,
+            "position":    self.current_position,
+            "busy":        self.is_busy,
             "needle_down": self.needle_down
         }
 
 state = CarouselState()
 
+# ============================================================
+# CZUJNIKI
+# ============================================================
 @dataclass
 class SensorData:
-    ph: float
-    tds: float
-    temperature: float
-    conductivity: float
-    
-    
+    ph:            float
+    tds:           float
+    temperature:   float
+    conductivity:  float
+
     def voltage_to_ph(voltage):
         return slope_ph * voltage + offset_ph
 
     def read_ph_avg(samples=20):
-        """Pobierz 20 próbek, odrzuć 20% skrajnych, uśrednij resztę"""
         readings = []
         for _ in range(samples):
             readings.append(SensorData.voltage_to_ph(chan_ph.voltage))
             time.sleep(0.05)
         readings.sort()
-        # Odrzuć 20% z góry i z dołu (po 4 wartości)
         cut = samples // 5
         trimmed = readings[cut:-cut]
         return sum(trimmed) / len(trimmed)
-    
+
     def voltage_to_ec(voltage):
         if voltage <= CAL_VOLTAGE_DRY:
             return 0
@@ -198,15 +221,14 @@ class SensorData:
         readings.sort()
         trimmed = readings[1:-1]
         return sum(trimmed) / len(trimmed)
-    
+
     def find_sensor():
         devices = glob.glob('/sys/bus/w1/devices/28*')
         if devices:
-            # print(f"Znaleziono czujnik temp: {devices[0].split('/')[-1]}")
             return devices[0] + '/w1_slave'
         print("Temp czujnik: BRAK - sprawdź połączenie GPIO4 i 1-Wire!")
         return None
-    
+
     def read_temp(retries=5):
         device_file = SensorData.find_sensor()
         if device_file is None:
@@ -222,12 +244,11 @@ class SensorData:
                         return TEMP_SLOPE * raw + TEMP_OFFSET
                 if attempt < retries - 1:
                     time.sleep(0.2)
-            except Exception as e:
+            except Exception:
                 if attempt < retries - 1:
                     time.sleep(0.2)
         return None
 
-    # === TDS DFRobot ===
     def voltage_to_tds(voltage, temperature=25.0):
         compensation_coeff = 1.0 + 0.02 * (temperature - 25.0)
         voltage_comp = voltage / compensation_coeff
@@ -235,13 +256,155 @@ class SensorData:
              - 255.86 * voltage_comp**2
              + 857.39 * voltage_comp) * 0.5
         return max(0, tds)
-    
+
+# ============================================================
+# KAMERA - WĄTEK PRZECHWYTYWANIA
+# ============================================================
+def camera_capture_loop():
+    """Czyta klatki z libcamera-vid i wrzuca do bufora"""
+    global _last_frame
+
+    cmd = [
+        "libcamera-vid",
+        "--width",     str(CAM_WIDTH),
+        "--height",    str(CAM_HEIGHT),
+        "--framerate", str(CAM_FPS),
+        "--codec",     "mjpeg",
+        "--quality",   str(CAM_QUALITY),
+        "--timeout",   "0",
+        "--nopreview",
+        "-o", "-",
+    ]
+
+    print(f"[CAM] Start: {CAM_WIDTH}x{CAM_HEIGHT} @ {CAM_FPS}fps")
+
+    while True:
+        try:
+            proc = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+                bufsize=0
+            )
+            print("[CAM] Kamera aktywna")
+
+            buf = b""
+            while True:
+                chunk = proc.stdout.read(4096)
+                if not chunk:
+                    break
+                buf += chunk
+
+                while True:
+                    start = buf.find(b"\xff\xd8")
+                    end   = buf.find(b"\xff\xd9", start + 2)
+                    if start == -1 or end == -1:
+                        break
+                    jpeg = buf[start:end + 2]
+                    buf  = buf[end + 2:]
+                    with _frame_lock:
+                        _last_frame = jpeg
+                    _frame_event.set()
+                    _frame_event.clear()
+
+        except Exception as e:
+            print(f"[CAM] Błąd: {e} — restart za 2s")
+            time.sleep(2)
+
+# ============================================================
+# KAMERA - SERWER HTTP
+# ============================================================
+class MJPEGHandler(BaseHTTPRequestHandler):
+
+    def log_message(self, format, *args):
+        pass  # wycisz logi HTTP
+
+    def do_GET(self):
+        if self.path == "/stream":
+            self._serve_stream()
+        elif self.path == "/snapshot":
+            self._serve_snapshot()
+        elif self.path == "/":
+            self._serve_index()
+        else:
+            self.send_error(404)
+
+    def _serve_stream(self):
+        self.send_response(200)
+        self.send_header("Content-Type", "multipart/x-mixed-replace; boundary=--frame")
+        self.send_header("Cache-Control", "no-cache")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.end_headers()
+        print(f"[CAM] Klient podłączony: {self.client_address[0]}")
+        try:
+            while True:
+                _frame_event.wait(timeout=1.0)
+                with _frame_lock:
+                    frame = _last_frame
+                if frame is None:
+                    continue
+                header = (
+                    b"--frame\r\n"
+                    b"Content-Type: image/jpeg\r\n"
+                    b"Content-Length: " + str(len(frame)).encode() + b"\r\n"
+                    b"\r\n"
+                )
+                self.wfile.write(header + frame + b"\r\n")
+                self.wfile.flush()
+        except (BrokenPipeError, ConnectionResetError):
+            print(f"[CAM] Rozłączono: {self.client_address[0]}")
+        except Exception as e:
+            print(f"[CAM] Błąd streamu: {e}")
+
+    def _serve_snapshot(self):
+        with _frame_lock:
+            frame = _last_frame
+        if frame is None:
+            self.send_error(503, "Brak klatki")
+            return
+        self.send_response(200)
+        self.send_header("Content-Type", "image/jpeg")
+        self.send_header("Content-Length", str(len(frame)))
+        self.send_header("Cache-Control", "no-cache")
+        self.end_headers()
+        self.wfile.write(frame)
+
+    def _serve_index(self):
+        html = (
+            f"<html><body style='background:#000;color:#fff;text-align:center'>"
+            f"<h2>RPi #2 CAM {CAM_WIDTH}x{CAM_HEIGHT}@{CAM_FPS}fps</h2>"
+            f"<img src='/stream'>"
+            f"</body></html>"
+        ).encode()
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html")
+        self.send_header("Content-Length", str(len(html)))
+        self.end_headers()
+        self.wfile.write(html)
+
+
+def camera_server_loop():
+    """Uruchamia serwer HTTP kamery — odpala się jako wątek"""
+    try:
+        server = HTTPServer(("0.0.0.0", CAM_PORT), MJPEGHandler)
+        server.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        try:
+            ip = socket.gethostbyname(socket.gethostname())
+        except Exception:
+            ip = "?.?.?.?"
+        print(f"[CAM] Serwer HTTP: http://{ip}:{CAM_PORT}/stream")
+        server.serve_forever()
+    except Exception as e:
+        print(f"[CAM] Błąd serwera HTTP: {e}")
+
+# ============================================================
+# GPIO / SERIAL
+# ============================================================
 def init_gpio():
-    """Inicjalizacja GPIO dla pompy"""
     try:
         GPIO.setmode(GPIO.BCM)
         GPIO.setwarnings(False)
-        GPIO.set (PUMP_1_RELAY_PIN, GPIO.OUT)
+        GPIO.setup(PUMP_1_RELAY_PIN, GPIO.OUT)
         GPIO.output(PUMP_1_RELAY_PIN, GPIO.LOW)
         GPIO.setup(PUMP_2_RELAY_PIN, GPIO.OUT)
         GPIO.output(PUMP_2_RELAY_PIN, GPIO.LOW)
@@ -252,7 +415,6 @@ def init_gpio():
         return None
 
 def init_serial():
-    """Inicjalizacja połączenia Serial z Arduino"""
     global ser
     try:
         ser = serial.Serial(
@@ -262,12 +424,15 @@ def init_serial():
             write_timeout=1.0
         )
         print(f"Serial otwarty: {SERIAL_PORT} @ {SERIAL_BAUD}")
-        time.sleep(2)  
+        time.sleep(2)
         return True
     except Exception as e:
         print(f"Błąd otwarcia Serial: {e}")
         return False
 
+# ============================================================
+# CZUJNIKI
+# ============================================================
 def read_sensors():
     temp = SensorData.read_temp()
     sensor_data['ph']           = SensorData.read_ph_avg()
@@ -278,17 +443,15 @@ def read_sensors():
                                       temp if temp is not None else 25.0
                                   )
     db_manager.add_measurement(
-    time.time(),
-    round(sensor_data['ph'], 2),
-    round(sensor_data['tds'], 2),
-    round(sensor_data['temperature'], 2),
-    round(sensor_data['conductivity'], 2)
+        time.time(),
+        round(sensor_data['ph'], 2),
+        round(sensor_data['tds'], 2),
+        round(sensor_data['temperature'], 2),
+        round(sensor_data['conductivity'], 2)
     )
 
 def control_pump_1(active, GPIO=None):
-    """Sterowanie pompą 1 z zabezpieczeniem czasowym"""
     global pump_state
-
     if active:
         GPIO.output(PUMP_1_RELAY_PIN, GPIO.HIGH)
         pump_state = True
@@ -297,25 +460,22 @@ def control_pump_1(active, GPIO=None):
         def auto_shutoff():
             global pump_state
             time.sleep(PUMP_1_MAX_TIME)
-            if pump_state:  
+            if pump_state:
                 GPIO.output(PUMP_1_RELAY_PIN, GPIO.LOW)
                 pump_state = False
                 print(f"[SAFETY] Pompa 1 wyłączona automatycznie po {PUMP_1_MAX_TIME}s!")
 
         threading.Thread(target=auto_shutoff, daemon=True).start()
-
     else:
         GPIO.output(PUMP_1_RELAY_PIN, GPIO.LOW)
         pump_state = False
         print("Pompa 1: OFF")
 
 def send_data():
-    """Wyślij dane do Arduino"""
     if ser and ser.is_open:
-        data_str = f"DATA:{sensor_data['ph']:.2f},{sensor_data['tds']:.1f}," \
-                   f"{sensor_data['temperature']:.1f},{sensor_data['conductivity']:.1f}," \
-                   f"{1 if pump_state else 0}\n"
-        
+        data_str = (f"DATA:{sensor_data['ph']:.2f},{sensor_data['tds']:.1f},"
+                    f"{sensor_data['temperature']:.1f},{sensor_data['conductivity']:.1f},"
+                    f"{1 if pump_state else 0}\n")
         try:
             ser.write(data_str.encode('utf-8'))
             ser.flush()
@@ -324,12 +484,10 @@ def send_data():
             print(f"Błąd wysyłania: {e}")
 
 def send_status():
-    """Wyślij status systemu"""
     if ser and ser.is_open:
-        battery_mv = 3700  # TODO: Odczyt napięcia baterii
+        battery_mv  = 3700  # TODO: Odczyt napięcia baterii
         error_flags = 0
-        status_str = f"STATUS:OK,{battery_mv},{error_flags}\n"
-        
+        status_str  = f"STATUS:OK,{battery_mv},{error_flags}\n"
         try:
             ser.write(status_str.encode('utf-8'))
             print(f"Status: {status_str.strip()}")
@@ -337,12 +495,10 @@ def send_status():
             print(f"Błąd wysyłania statusu: {e}")
 
 def process_command(command, GPIO=None):
-    """Przetwórz komendę z Arduino"""
     global measuring, measurement_start_time, measurement_duration, last_measure_time
-    
+
     command = command.strip().upper()
-    
-    # Ignoruj debug logi i komunikaty startowe z Arduino
+
     IGNORED_PREFIXES = (
         "TX DATA", "RX COMMAND", "[DEBUG]", "===",
         "SYSTEM", "NASŁUCHIWANIE", "STACJA", "ARDUINO",
@@ -354,66 +510,55 @@ def process_command(command, GPIO=None):
     if command.startswith("MEASURE:"):
         try:
             duration = int(command.split(':')[1])
-            
-            # DEBOUNCING - ignoruj jeśli ostatnia komenda <3s temu
             if time.time() - last_measure_time < 3:
-                return  
-            
-            last_measure_time = time.time()
-            measuring = True
+                return
+            last_measure_time      = time.time()
+            measuring              = True
             measurement_start_time = time.time()
-            measurement_duration = duration
+            measurement_duration   = duration
             print(f"START pomiaru przez {duration}s")
         except ValueError:
             print(f"Nieprawidłowa komenda MEASURE: {command}")
-    
+
     elif command == "STOP":
         measuring = False
         print("STOP pomiaru")
-    
+
     elif command == "PUMP_ON":
         control_pump_1(True, GPIO)
-    
+
     elif command == "PUMP_OFF":
         control_pump_1(False, GPIO)
-    
+
     elif command == "STATUS":
         send_status()
-        
+
     elif command == "SAMPLES_LOADING":
         threading.Thread(target=loading_sequence, daemon=True).start()
 
     elif command == "REJECT_SAMPLE":
         threading.Thread(target=reject_sample, daemon=True).start()
-        
+
     elif command == "GET_DATA":
         if measuring:
             read_sensors()
-            # print(f"Dane: {sensor_data}")  ← debug
-            # print("Czytam czujniki...")   
             send_data()
-    #     else:
-    #         print("GET_DATA zignorowane - pomiar nieaktywny")  # ← debug
-    
+
     else:
         print(f"Nieznana komenda: {command}")
 
 def send_stop_to_arduino():
-    """Wyslij STOP do Arduino - zatrzymaj autoMode"""
     if ser and ser.is_open:
         try:
             ser.write(b"MEASUREMENT_DONE\n")
             ser.flush()
-            time.sleep(0.5)  # ← DODAJ - daj Arduino czas na odczyt
+            time.sleep(0.5)
             print("Wyslano MEASUREMENT_DONE do Arduino")
         except Exception as e:
             print(f"Blad wysylania STOP: {e}")
-            
-            
+
 def measurement_loop(GPIO=None):
-    """Pętla pomiaru - wykonuje pomiary gdy measuring=True"""
     global last_measurement, measuring
-    
     while True:
         if measuring:
             elapsed = time.time() - measurement_start_time
@@ -422,44 +567,34 @@ def measurement_loop(GPIO=None):
                 measuring = False
                 send_stop_to_arduino()
                 continue
-            
             if time.time() - last_measurement >= MEASUREMENT_INTERVAL:
                 print(f"Pomiar ({elapsed:.0f}/{measurement_duration}s)...")
-                try: 
+                try:
                     read_sensors()
                     send_data()
-                except Exception as e:  
+                except Exception as e:
                     print(f"[ERROR] Błąd odczytu czujników: {e}")
-                    
                 last_measurement = time.time()
-        
         time.sleep(0.1)
 
 def pump_2_sequence(duration):
     GPIO.output(PUMP_2_RELAY_PIN, GPIO.HIGH)
-    print("Pompa 2   ON")
+    print("Pompa 2 ON")
     time.sleep(duration)
     GPIO.output(PUMP_2_RELAY_PIN, GPIO.LOW)
     print("Pompa 2 OFF")
-        
+
 def serial_listener(GPIO=None):
-    """Nasłuchiwanie komend z Arduino"""
     print("Nasłuchiwanie komend...")
-    
     buffer = b''
-    
     while True:
         if ser and ser.is_open:
             try:
-                
                 if ser.in_waiting > 0:
-                    data = ser.read(ser.in_waiting)
+                    data   = ser.read(ser.in_waiting)
                     buffer += data
-                    
-                    # Przetwarzaj kompletne linie
                     while b'\n' in buffer:
                         line, buffer = buffer.split(b'\n', 1)
-                        
                         try:
                             command = line.decode('utf-8').strip()
                             if command:
@@ -467,149 +602,97 @@ def serial_listener(GPIO=None):
                                 process_command(command, GPIO)
                         except UnicodeDecodeError:
                             print(f"Błąd dekodowania: {line}")
-            
             except Exception as e:
                 print(f"Błąd odczytu Serial: {e}")
                 time.sleep(1)
-        
         time.sleep(0.05)
-        
-# === FUNKCJE KARUZELI ===
+
+# ============================================================
+# KARUZELA
+# ============================================================
 def set_step(w1, w2, w3, w4):
-    """Ustaw stan pinów silnika krokowego"""
     GPIO.output(STEP_IN1, w1)
     GPIO.output(STEP_IN2, w2)
     GPIO.output(STEP_IN3, w3)
     GPIO.output(STEP_IN4, w4)
 
 def rotate_carousel(steps, direction=1, delay=0.002):
-    """
-    Obróć karuzelę o określoną liczbę kroków
-    direction: 1 = do przodu, -1 = do tyłu
-    """
     seq_length = len(HALF_STEP_SEQ)
     for _ in range(steps):
         for step in range(seq_length)[::direction]:
             set_step(*HALF_STEP_SEQ[step])
             time.sleep(delay)
-    # Wyłącz cewki po obrocie
     set_step(0, 0, 0, 0)
 
 def move_servo(position):
-    """Przesuń servo do pozycji (duty cycle %)"""
     servo_pwm.ChangeDutyCycle(position)
-    time.sleep(0.5)  # Poczekaj na ruch servo
-    servo_pwm.ChangeDutyCycle(0)  # Zatrzymaj sygnał PWM
+    time.sleep(0.5)
+    servo_pwm.ChangeDutyCycle(0)
 
 def needle_up():
-    """Podnieś igłę"""
     print("Podnoszę igłę...")
     move_servo(SERVO_UP)
     state.needle_down = False
 
 def needle_down():
-    """Opuść igłę"""
     print("Opuszczam igłę...")
     move_servo(SERVO_DOWN)
     state.needle_down = True
 
 def next_position():
-    """Przesuń karuzelę do następnej pozycji"""
     print(f"Przesuwam z pozycji {state.current_position}...")
     rotate_carousel(STEPS_PER_POSITION, direction=1)
     state.current_position = (state.current_position + 1) % TOTAL_POSITIONS
     print(f"Nowa pozycja: {state.current_position}")
 
 def reject_sample():
-    """
-    Odrzuć próbkę:
-    1. Obróć karuzelę do pozycji odrzutu (pozycja 0 = zlew)
-    2. Opuść igłę
-    3. Włącz pompę na REJECT_PUMP_TIME sekund
-    4. Podnieś igłę
-    5. Wróć do poprzedniej pozycji
-    """
     with state.lock:
         if state.is_busy:
             print("[REJECT] System zajęty - odrzut niemożliwy")
             return {"error": "System zajęty"}
         state.is_busy = True
-
     try:
         original_position = state.current_position
         print(f"\n=== ODRZUT PRÓBKI - z pozycji {original_position} ===")
-
-        
         steps_to_reject = (REJECT_POSITION - state.current_position) % TOTAL_POSITIONS
-
         if steps_to_reject > 0:
             print(f"Obracam do pozycji odrzutu ({REJECT_POSITION})...")
             rotate_carousel(steps_to_reject * STEPS_PER_POSITION, direction=1)
             state.current_position = REJECT_POSITION
         else:
             print("Już na pozycji odrzutu.")
-        
         needle_down()
-
         pump_2_sequence(REJECT_PUMP_TIME)
-
         needle_up()
-
-        # Wróć do oryginalnej pozycji
         steps_back = (original_position - REJECT_POSITION) % TOTAL_POSITIONS
         if steps_back > 0:
             print(f"Wracam do pozycji {original_position}...")
             rotate_carousel(steps_back * STEPS_PER_POSITION, direction=1)
             state.current_position = original_position
-
         print("=== ODRZUT ZAKOŃCZONY ===\n")
         return {"success": True, "drained_from": original_position}
-
     finally:
         state.is_busy = False
-        
-# === SEKWENCJA ZAŁADUNKU ===
+
 def loading_sequence():
-    """
-    Główna sekwencja pomiaru: 
-    1. Igła w dół
-    2. Pompowanie
-    3. Igła w górę
-    4. Następna pozycja
-    """
     with state.lock:
         if state.is_busy:
             return {"error": "System zajęty"}
         state.is_busy = True
-    
     try:
         print(f"\n=== START SEKWENCJI - Pozycja {state.current_position} ===")
-        
-        # 1. Igła w dół
         needle_down()
-        
-        # 2. Pompowanie 
         pump_2_sequence(PUMP_DURATION)
-        
-        # 3. Igła w górę
         needle_up()
-        
-        # 4. Następna pozycja
         next_position()
-        
         print("=== KONIEC SEKWENCJI ===\n")
-        
-        return {
-            "success": True,
-            "position": state.current_position - 1,  # Pozycja przed przesunięciem
-        
-        }
-    
+        return {"success": True, "position": state.current_position - 1}
     finally:
         state.is_busy = False
-        
-# === GŁÓWNA FUNKCJA ===
 
+# ============================================================
+# GŁÓWNA FUNKCJA
+# ============================================================
 def main():
     """Główna funkcja"""
     print()
@@ -626,7 +709,28 @@ def main():
     if not init_serial():
         print("Nie można otworzyć Serial. Sprawdź połączenie.")
         return
-    
+
+    # Wątki stacji pomiarowej
+    listener_thread = threading.Thread(target=serial_listener, args=(GPIO,), daemon=True)
+    listener_thread.start()
+
+    measurement_thread = threading.Thread(target=measurement_loop, args=(GPIO,), daemon=True)
+    measurement_thread.start()
+
+    db_manager.init_database()
+    db_thread = threading.Thread(target=db_manager.database_worker, daemon=True)
+    db_thread.start()
+
+    # Wątki kamery
+    if CAM_ENABLED:
+        cam_capture_thread = threading.Thread(target=camera_capture_loop, daemon=True)
+        cam_capture_thread.start()
+
+        cam_server_thread = threading.Thread(target=camera_server_loop, daemon=True)
+        cam_server_thread.start()
+    else:
+        print("[CAM] Kamera wyłączona (CAM_ENABLED = False)")
+
     print()
     print("=" * 60)
     print("SYSTEM GOTOWY")
@@ -636,41 +740,23 @@ def main():
     print("Komendy: MEASURE:duration, STOP, PUMP_ON, PUMP_OFF, GET_DATA, STATUS")
     print("Ctrl+C aby zakończyć")
     print()
-    
-    # Uruchom wątki
-    listener_thread = threading.Thread(target=serial_listener, args=(GPIO,))
-    listener_thread.daemon = True
-    listener_thread.start()
-    
-    measurement_thread = threading.Thread(target=measurement_loop, args=(GPIO,))
-    measurement_thread.daemon = True
-    measurement_thread.start()
-    
-    db_manager.init_database() 
-    db_thread = threading.Thread(target=db_manager.database_worker)
-    db_thread.daemon = True
-    db_thread.start()
-    
+
     try:
-        # Główna pętla (keep alive)
         while True:
             time.sleep(1)
-    
+
     except KeyboardInterrupt:
         print("\n\nZatrzymywanie...")
-    
+
     finally:
-        # Cleanup
         if pump_state and GPIO:
             control_pump_1(False, GPIO)
-        
         if ser and ser.is_open:
             ser.close()
-        
         if GPIO:
             GPIO.cleanup()
-        
         print("Zamknięto")
+
 
 if __name__ == '__main__':
     main()

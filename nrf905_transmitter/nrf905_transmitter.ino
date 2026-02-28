@@ -47,12 +47,12 @@
 // Command codes (od RPi#1)
 #define CMD_MEASURE_START   0x01
 #define CMD_MEASURE_STOP    0x02
-#define CMD_PUMP_ON         0x03  // Pompa 1 ON  (napełnianie zbiornika)
-#define CMD_PUMP_OFF        0x04  // Pompa 1 OFF
+#define CMD_PUMP_ON         0x03  // Pompa 1 (napełnianie zbiornika)
+#define CMD_PUMP_OFF        0x04  // Pompa 1 
 #define CMD_STATUS_REQUEST  0x05
 #define CMD_SAMPLES_LOADING 0x06  // Sekwencja ładowania próbki (pompa 2)
 #define CMD_REJECT_SAMPLE   0x07  // Odrzut próbki - opróżnianie (pompa 2)
-#define CMD_BOAT_DRIVE      0x20  // Napęd łódki: param1=lewy(0-200), param2=prawy(0-200), 100=stop
+#define CMD_BOAT_DRIVE      0x20  // Napęd łódki: param1=lewy(0-200), param2=prawy(0-200), 100=stop (radio nie pozwala wysyłac ujemnych więc przesuwamy zakres do 0-200)
 
 // Packet types (do RPi#1)
 #define PACKET_DATA   0x10
@@ -316,11 +316,11 @@ void processCommand(uint8_t cmd, uint16_t param1, uint16_t param2) {
       Serial.println(F("STATUS"));
       break;
 
-    case CMD_SAMPLES_LOADING:           // ← NOWE
+    case CMD_SAMPLES_LOADING:           
       Serial.println(F("SAMPLES_LOADING"));
       break;
 
-    case CMD_REJECT_SAMPLE:             // ← NOWE
+    case CMD_REJECT_SAMPLE:             
       Serial.println(F("REJECT_SAMPLE"));
       break;
 
@@ -362,26 +362,25 @@ void processSerialData() {
     int idx4 = line.indexOf(',', idx3 + 1);
 
     if (idx1 > 0 && idx2 > 0 && idx3 > 0 && idx4 > 0) {
-      sensorData.ph           = line.substring(0, idx1).toFloat();
-      sensorData.tds          = line.substring(idx1 + 1, idx2).toFloat();
-      sensorData.temperature  = line.substring(idx2 + 1, idx3).toFloat();
+      sensorData.ph = line.substring(0, idx1).toFloat();
+      sensorData.tds = line.substring(idx1 + 1, idx2).toFloat();
+      sensorData.temperature = line.substring(idx2 + 1, idx3).toFloat();
       sensorData.conductivity = line.substring(idx3 + 1, idx4).toFloat();
-      sensorData.errorFlags   = line.substring(idx4 + 1).toInt() & 0x01;
-      sensorData.timestamp    = millis() / 1000;
+      sensorData.errorFlags = line.substring(idx4 + 1).toInt() & 0x01;
+      sensorData.timestamp = millis() / 1000;
 
       transmitData();
     }
   }
   else if (line.startsWith("MEASUREMENT_DONE")) {
     autoMode = false;
-    // Daj znać że odebrało
     digitalWrite(LED_BUILTIN, HIGH);
     delay(1000);
     digitalWrite(LED_BUILTIN, LOW);
   }
 
   else if (line.startsWith("STATUS:")) {
-    // TODO: parsuj status i przekaż do RPi#1 jeśli potrzeba
+    // TODO: parsuj status i przekaż do RPi#1(opcjonalne)
   }
 }
 
