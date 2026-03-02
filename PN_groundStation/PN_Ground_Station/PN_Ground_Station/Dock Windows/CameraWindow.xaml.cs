@@ -129,7 +129,7 @@ namespace PN_Ground_Station.DockWindows
                 {
                     txtStatus.Text = $"● Błąd: {ex.Message}";
                     txtStatus.Foreground = System.Windows.Media.Brushes.Orange;
-                    StopStream();
+                    //StopStream();
                 });
             }
         }

@@ -52,6 +52,13 @@ Pompa 2 (próbówki)             IN → GPIO 25 (pin 22)
 VCC → 5V Raspberry Pi
 GND → GND
 
+Enkoder:
+VCC → 3.3V na Raspberry pi
+GND → GND na Raspberry pi
+Pin 5 → GPIO16(Pin 36)
+Pin 7 → GPIO20(Pin 38)
+Pin 9 → GPIO21(Pin 40)
+
 ┌──────────────────────────────────────────────────────────┐
 │           RASPBERRY PI 4          →        nRF905        					│
 ├──────────────────────────────────────────────────────────┤
