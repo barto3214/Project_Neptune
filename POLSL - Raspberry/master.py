@@ -56,7 +56,7 @@ PUMP_2_RELAY_PIN = 25  # GPIO 25 dla przekaźnika pompy 2
 PUMP_DURATION = 5.0    # Czas pracy pompy w sekundach do załadunku probówki TODO: USTAWIĆ REALNY
 REJECT_POSITION = 0    # Pozycja karuzeli do odrzutu 
 REJECT_PUMP_TIME = 8.0 # Czas pracy pompy przy odrzucaniu próbki (do opróżnienia zbiornika) TODO: USTAWIĆ REALNY
-PUMP_1_MAX_TIME = 30.0 # Maksymalny czas pracy pompy 1 (żeby nie rozsadziło)TODO: USTAWIĆ REALNY
+PUMP_1_MAX_TIME = 30.0 # Maksymalny czas pracy pompy 1 (żeby nie rozsadziło) TODO: USTAWIĆ REALNY
 
 # === I2C ===
 i2c = I2C(1)
@@ -115,11 +115,27 @@ SERVO_PIN = 18
 
 # Pozycje karuzeli
 TOTAL_POSITIONS = 6  
-STEPS_PER_POSITION = 44  # Liczba kroków do przesunięcia o jedną pozycję TODO: USTAWIĆ REALNY
+STEPS_PER_POSITION = 43  # Liczba kroków — używana jako backup gdy enkoder wyłączony
 
 # Pozycje servo
-SERVO_UP = 6.0    # Duty cycle % dla pozycji górnej (ok. 90°)TODO: USTAWIĆ REALNY
-SERVO_DOWN = 12.5  # Duty cycle % dla pozycji dolnej (ok. 180°)TODO: USTAWIĆ REALNY
+SERVO_UP = 11.7    # Duty cycle % dla pozycji górnej 
+SERVO_DOWN = 2.5  # Duty cycle % dla pozycji dolnej 
+
+# === ENKODER HEDL-5540 ===
+
+#              Pin5(GREEN)→GPIO16, Pin7(VIOLET)→GPIO20, Pin9(WHITE)→GPIO21
+ENC_A               = 16    # GPIO 16 (PIN 36) - kanał A
+ENC_B               = 20    # GPIO 20 (PIN 38) - kanał B
+ENC_I               = 21    # GPIO 21 (PIN 40) - index (jeden impuls/obrót)
+ENCODER_ENABLED     = True  # False = tryb krokowy bez enkodera
+TICKS_PER_POSITION  = 165   # TODO: USTAWIĆ Z KALIBRACJI (kalibracja.py opcja 3)
+ENCODER_TOLERANCE   = 2     # Dopuszczalny błąd pozycji w tickach
+ENCODER_MAX_RETRIES = 3     # Ile razy próbować korekty zanim się podda
+ENCODER_TIMEOUT     = 15.0  # Max sekund na jeden obrót
+
+# Licznik ticków enkodera — aktualizowany przez wątek pollingu
+_enc_tick_count = 0
+_enc_last_a     = 0  # poprzedni stan kanału A (do detekcji zbocza przez polling)
 
 # ============================================================
 # KONFIGURACJA KAMERY
@@ -258,14 +274,34 @@ class SensorData:
         return max(0, tds)
 
 # ============================================================
+# ENKODER - POLLING
+# Zamiast przerwań (GPIO.add_event_detect) używamy pollingu w osobnym wątku.
+# RPi.GPIO ma znany błąd z edge detection na nowszych kernelach/Python 3.13.
+# Polling 10kHz jest wystarczający — enkoder 12CPR daje max ~400 ticków/s.
+# ============================================================
+def _encoder_poll_loop():
+    """Wątek pollingu enkodera — wykrywa zbocza kanału A i liczy ticki"""
+    global _enc_tick_count, _enc_last_a
+    while True:
+        a = GPIO.input(ENC_A)
+        if a != _enc_last_a:          # wykryto zbocze na kanale A
+            b = GPIO.input(ENC_B)
+            if a != b:
+                _enc_tick_count += 1  # obrót do przodu
+            else:
+                _enc_tick_count -= 1  # obrót do tyłu
+            _enc_last_a = a
+        time.sleep(0.0001)            # 10kHz polling
+
+# ============================================================
 # KAMERA - WĄTEK PRZECHWYTYWANIA
 # ============================================================
 def camera_capture_loop():
-    """Czyta klatki z libcamera-vid i wrzuca do bufora"""
+    """Czyta klatki z rpicam-vid i wrzuca do bufora"""
     global _last_frame
 
     cmd = [
-        "libcamera-vid",
+        "rpicam-vid",
         "--width",     str(CAM_WIDTH),
         "--height",    str(CAM_HEIGHT),
         "--framerate", str(CAM_FPS),
@@ -286,7 +322,7 @@ def camera_capture_loop():
                 stderr=subprocess.DEVNULL,
                 bufsize=0
             )
-            print("[CAM] Kamera aktywna")
+            #print("[CAM] Kamera aktywna") <- debug
 
             buf = b""
             while True:
@@ -389,7 +425,10 @@ def camera_server_loop():
         server = HTTPServer(("0.0.0.0", CAM_PORT), MJPEGHandler)
         server.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         try:
-            ip = socket.gethostbyname(socket.gethostname())
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))
+            ip = s.getsockname()[0]
+            s.close()
         except Exception:
             ip = "?.?.?.?"
         print(f"[CAM] Serwer HTTP: http://{ip}:{CAM_PORT}/stream")
@@ -408,6 +447,15 @@ def init_gpio():
         GPIO.output(PUMP_1_RELAY_PIN, GPIO.LOW)
         GPIO.setup(PUMP_2_RELAY_PIN, GPIO.OUT)
         GPIO.output(PUMP_2_RELAY_PIN, GPIO.LOW)
+
+        # Enkoder — setup pinów wejściowych i start wątku pollingu
+        if ENCODER_ENABLED:
+            GPIO.setup(ENC_A, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+            GPIO.setup(ENC_B, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+            GPIO.setup(ENC_I, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+            threading.Thread(target=_encoder_poll_loop, daemon=True).start()
+            print(f"Enkoder: GPIO{ENC_A}/GPIO{ENC_B}, {TICKS_PER_POSITION} tick/poz")
+
         print("GPIO zainicjalizowane")
         return GPIO
     except ImportError:
@@ -616,13 +664,89 @@ def set_step(w1, w2, w3, w4):
     GPIO.output(STEP_IN3, w3)
     GPIO.output(STEP_IN4, w4)
 
+def _rotate_ticks(target_ticks, direction=1, delay=0.002):
+    """
+    Obraca karuzelę aż enkoder zliczy target_ticks ticków.
+    Po zatrzymaniu sprawdza błąd i wykonuje korektę (max ENCODER_MAX_RETRIES razy).
+    Zwraca True jeśli pozycja osiągnięta, False jeśli timeout/błąd.
+    """
+    global _enc_tick_count
+
+    remaining = target_ticks  # ile ticków jeszcze do przejechania
+
+    for attempt in range(ENCODER_MAX_RETRIES):
+        _enc_tick_count = 0  # reset licznika przed każdą próbą
+        t0 = time.time()
+
+        # Obracaj dopóki enkoder nie zliczy wymaganej liczby ticków
+        while True:
+            cur = abs(_enc_tick_count)
+            if cur >= remaining:
+                break
+            if time.time() - t0 > ENCODER_TIMEOUT:
+                print(f"[ENC] Timeout przy próbie {attempt+1}! {cur}/{remaining} ticków")
+                set_step(0, 0, 0, 0)
+                return False
+            # Wykonaj jeden krok silnika
+            for s in range(len(HALF_STEP_SEQ))[::direction]:
+                set_step(*HALF_STEP_SEQ[s])
+                time.sleep(delay)
+
+        set_step(0, 0, 0, 0)
+        time.sleep(0.05)  # poczekaj aż karuzela się ustabilizuje
+
+        # Sprawdź błąd pozycji
+        final = abs(_enc_tick_count)
+        done_so_far = (target_ticks - remaining) + final
+        error = done_so_far - target_ticks
+        print(f"[ENC] Próba {attempt+1}: {done_so_far}/{target_ticks} ticków, błąd={error:+d}")
+
+        if abs(error) <= ENCODER_TOLERANCE:
+            print(f"[ENC] OK — pozycja osiągnięta")
+            return True
+
+        if error < 0:
+            # Za mało — dokręć brakujące ticki
+            remaining = target_ticks - done_so_far
+            print(f"[ENC] Korekta: brakuje {remaining} ticków")
+        else:
+            # Za dużo — cofnij nadmiar
+            print(f"[ENC] Korekta: cofam o {error} ticków")
+            _enc_tick_count = 0
+            t0 = time.time()
+            while True:
+                if abs(_enc_tick_count) >= error:
+                    break
+                if time.time() - t0 > ENCODER_TIMEOUT:
+                    break
+                for s in range(len(HALF_STEP_SEQ))[::-direction]:
+                    set_step(*HALF_STEP_SEQ[s])
+                    time.sleep(delay)
+            set_step(0, 0, 0, 0)
+            return True
+
+    print(f"[ENC] BŁĄD: nie osiągnięto pozycji po {ENCODER_MAX_RETRIES} próbach!")
+    return False
+
 def rotate_carousel(steps, direction=1, delay=0.002):
-    seq_length = len(HALF_STEP_SEQ)
-    for _ in range(steps):
-        for step in range(seq_length)[::direction]:
-            set_step(*HALF_STEP_SEQ[step])
-            time.sleep(delay)
-    set_step(0, 0, 0, 0)
+    """
+    Główna funkcja obrotu karuzeli.
+    ENCODER_ENABLED=True  → obrót przez ticki enkodera (precyzyjny)
+    ENCODER_ENABLED=False → obrót przez kroki silnika (stary tryb backup)
+    """
+    if ENCODER_ENABLED:
+        # Przelicz liczbę kroków na mnożnik pozycji, wyznacz cel w tickach
+        multiplier = max(1, round(steps / STEPS_PER_POSITION)) if STEPS_PER_POSITION > 0 else 1
+        target_ticks = TICKS_PER_POSITION * multiplier
+        _rotate_ticks(target_ticks, direction, delay)
+    else:
+        # Tryb krokowy — stara logika bez enkodera
+        seq_length = len(HALF_STEP_SEQ)
+        for _ in range(steps):
+            for step in range(seq_length)[::direction]:
+                set_step(*HALF_STEP_SEQ[step])
+                time.sleep(delay)
+        set_step(0, 0, 0, 0)
 
 def move_servo(position):
     servo_pwm.ChangeDutyCycle(position)

@@ -47,10 +47,14 @@ GND (brązowy) → GND (wspólna masa z RPi)
 SIG (pomarańczowy) → GPIO 18 (pin 12, PWM)
 
 Przekaźniki pomp:
-Pompa 1 (napełnianie zbiornika) IN → GPIO 24 (pin 18)
-Pompa 2 (próbówki)             IN → GPIO 25 (pin 22)
-VCC → 5V Raspberry Pi
-GND → GND
+MOSFET VIN+   →  GPIO 24 (pompa 1) / GPIO 25 (pompa 2)
+MOSFET VIN-   →  GND RPi
+
+MOSFET PWM  →  12V zasilacz +
+MOSFET GND-  →  GND zasilacz (masa wspólna z RPi)
+
+MOSFET OUT+  →  Pompa +
+MOSFET OUT-  →  Pompa -
 
 Enkoder:
 VCC → 3.3V na Raspberry pi
