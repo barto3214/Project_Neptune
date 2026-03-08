@@ -3,12 +3,16 @@
   "WorkspaceRootPath": "C:\\Users\\barte\\Desktop\\Project_Neptune\\PN_groundStation\\PN_Ground_Station\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{1FAACA26-6A4F-4EBF-8FFD-A8ACC66ADD23}|PN_Ground_Station\\PN_Ground_Station.csproj|c:\\users\\barte\\desktop\\project_neptune\\pn_groundstation\\pn_ground_station\\pn_ground_station\\dock windows\\camerawindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{1FAACA26-6A4F-4EBF-8FFD-A8ACC66ADD23}|PN_Ground_Station\\PN_Ground_Station.csproj|solutionrelative:pn_ground_station\\dock windows\\camerawindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{1FAACA26-6A4F-4EBF-8FFD-A8ACC66ADD23}|PN_Ground_Station\\PN_Ground_Station.csproj|c:\\users\\barte\\desktop\\project_neptune\\pn_groundstation\\pn_ground_station\\pn_ground_station\\enginecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1FAACA26-6A4F-4EBF-8FFD-A8ACC66ADD23}|PN_Ground_Station\\PN_Ground_Station.csproj|solutionrelative:pn_ground_station\\enginecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{1FAACA26-6A4F-4EBF-8FFD-A8ACC66ADD23}|PN_Ground_Station\\PN_Ground_Station.csproj|c:\\users\\barte\\desktop\\project_neptune\\pn_groundstation\\pn_ground_station\\pn_ground_station\\dock windows\\controlswindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{1FAACA26-6A4F-4EBF-8FFD-A8ACC66ADD23}|PN_Ground_Station\\PN_Ground_Station.csproj|solutionrelative:pn_ground_station\\dock windows\\controlswindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{1FAACA26-6A4F-4EBF-8FFD-A8ACC66ADD23}|PN_Ground_Station\\PN_Ground_Station.csproj|c:\\users\\barte\\desktop\\project_neptune\\pn_groundstation\\pn_ground_station\\pn_ground_station\\dock windows\\camerawindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{1FAACA26-6A4F-4EBF-8FFD-A8ACC66ADD23}|PN_Ground_Station\\PN_Ground_Station.csproj|solutionrelative:pn_ground_station\\dock windows\\camerawindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1FAACA26-6A4F-4EBF-8FFD-A8ACC66ADD23}|PN_Ground_Station\\PN_Ground_Station.csproj|c:\\users\\barte\\desktop\\project_neptune\\pn_groundstation\\pn_ground_station\\pn_ground_station\\dock windows\\camerawindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1FAACA26-6A4F-4EBF-8FFD-A8ACC66ADD23}|PN_Ground_Station\\PN_Ground_Station.csproj|solutionrelative:pn_ground_station\\dock windows\\camerawindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{1FAACA26-6A4F-4EBF-8FFD-A8ACC66ADD23}|PN_Ground_Station\\PN_Ground_Station.csproj|c:\\users\\barte\\desktop\\project_neptune\\pn_groundstation\\pn_ground_station\\pn_ground_station\\dock windows\\controlswindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
@@ -17,14 +21,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{1FAACA26-6A4F-4EBF-8FFD-A8ACC66ADD23}|PN_Ground_Station\\PN_Ground_Station.csproj|c:\\users\\barte\\desktop\\project_neptune\\pn_groundstation\\pn_ground_station\\pn_ground_station\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
       "RelativeMoniker": "D:0:0:{1FAACA26-6A4F-4EBF-8FFD-A8ACC66ADD23}|PN_Ground_Station\\PN_Ground_Station.csproj|solutionrelative:pn_ground_station\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{1FAACA26-6A4F-4EBF-8FFD-A8ACC66ADD23}|PN_Ground_Station\\PN_Ground_Station.csproj|c:\\users\\barte\\desktop\\project_neptune\\pn_groundstation\\pn_ground_station\\pn_ground_station\\dock windows\\camerawindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{1FAACA26-6A4F-4EBF-8FFD-A8ACC66ADD23}|PN_Ground_Station\\PN_Ground_Station.csproj|solutionrelative:pn_ground_station\\dock windows\\camerawindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{1FAACA26-6A4F-4EBF-8FFD-A8ACC66ADD23}|PN_Ground_Station\\PN_Ground_Station.csproj|c:\\users\\barte\\desktop\\project_neptune\\pn_groundstation\\pn_ground_station\\pn_ground_station\\enginecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{1FAACA26-6A4F-4EBF-8FFD-A8ACC66ADD23}|PN_Ground_Station\\PN_Ground_Station.csproj|solutionrelative:pn_ground_station\\enginecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{1FAACA26-6A4F-4EBF-8FFD-A8ACC66ADD23}|PN_Ground_Station\\PN_Ground_Station.csproj|c:\\users\\barte\\desktop\\project_neptune\\pn_groundstation\\pn_ground_station\\pn_ground_station\\tcp_client.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -42,7 +38,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Bookmark",
@@ -50,7 +46,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 5,
               "Title": "TCP_client.cs",
               "DocumentMoniker": "C:\\Users\\barte\\Desktop\\Project_Neptune\\PN_groundStation\\PN_Ground_Station\\PN_Ground_Station\\TCP_client.cs",
               "RelativeDocumentMoniker": "PN_Ground_Station\\TCP_client.cs",
@@ -62,7 +58,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "ControlsWindow.xaml",
               "DocumentMoniker": "C:\\Users\\barte\\Desktop\\Project_Neptune\\PN_groundStation\\PN_Ground_Station\\PN_Ground_Station\\Dock Windows\\ControlsWindow.xaml",
               "RelativeDocumentMoniker": "PN_Ground_Station\\Dock Windows\\ControlsWindow.xaml",
@@ -73,55 +69,44 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 0,
               "Title": "EngineController.cs",
               "DocumentMoniker": "C:\\Users\\barte\\Desktop\\Project_Neptune\\PN_groundStation\\PN_Ground_Station\\PN_Ground_Station\\EngineController.cs",
               "RelativeDocumentMoniker": "PN_Ground_Station\\EngineController.cs",
               "ToolTip": "C:\\Users\\barte\\Desktop\\Project_Neptune\\PN_groundStation\\PN_Ground_Station\\PN_Ground_Station\\EngineController.cs",
               "RelativeToolTip": "PN_Ground_Station\\EngineController.cs",
-              "ViewState": "AgIAAH8AAAAAAAAAAADwv2cAAAAIAAAAAAAAAA==",
+              "ViewState": "AgIAAB8AAAAAAAAAAAAQwDAAAABHAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-26T19:09:51.275Z"
+              "WhenOpened": "2026-02-26T19:09:51.275Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 2,
               "Title": "CameraWindow.xaml.cs",
               "DocumentMoniker": "C:\\Users\\barte\\Desktop\\Project_Neptune\\PN_groundStation\\PN_Ground_Station\\PN_Ground_Station\\Dock Windows\\CameraWindow.xaml.cs",
               "RelativeDocumentMoniker": "PN_Ground_Station\\Dock Windows\\CameraWindow.xaml.cs",
               "ToolTip": "C:\\Users\\barte\\Desktop\\Project_Neptune\\PN_groundStation\\PN_Ground_Station\\PN_Ground_Station\\Dock Windows\\CameraWindow.xaml.cs",
               "RelativeToolTip": "PN_Ground_Station\\Dock Windows\\CameraWindow.xaml.cs",
-              "ViewState": "AgIAAHAAAAAAAAAAAAAAAH0AAAAgAAAAAAAAAA==",
+              "ViewState": "AgIAAHAAAAAAAAAAAAAAAHwAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-27T14:41:37.643Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-27T14:41:37.643Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 1,
               "Title": "CameraWindow.xaml",
               "DocumentMoniker": "C:\\Users\\barte\\Desktop\\Project_Neptune\\PN_groundStation\\PN_Ground_Station\\PN_Ground_Station\\Dock Windows\\CameraWindow.xaml",
               "RelativeDocumentMoniker": "PN_Ground_Station\\Dock Windows\\CameraWindow.xaml",
               "ToolTip": "C:\\Users\\barte\\Desktop\\Project_Neptune\\PN_groundStation\\PN_Ground_Station\\PN_Ground_Station\\Dock Windows\\CameraWindow.xaml",
               "RelativeToolTip": "PN_Ground_Station\\Dock Windows\\CameraWindow.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2026-02-27T14:41:47.729Z"
+              "WhenOpened": "2026-02-27T14:41:47.729Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "ControlsWindow.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\barte\\Desktop\\Project_Neptune\\PN_groundStation\\PN_Ground_Station\\PN_Ground_Station\\Dock Windows\\ControlsWindow.xaml.cs",
-              "RelativeDocumentMoniker": "PN_Ground_Station\\Dock Windows\\ControlsWindow.xaml.cs",
-              "ToolTip": "C:\\Users\\barte\\Desktop\\Project_Neptune\\PN_groundStation\\PN_Ground_Station\\PN_Ground_Station\\Dock Windows\\ControlsWindow.xaml.cs",
-              "RelativeToolTip": "PN_Ground_Station\\Dock Windows\\ControlsWindow.xaml.cs",
-              "ViewState": "AgIAAEIAAAAAAAAAAAAuwFUAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-26T09:26:57.69Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "MainWindow.xaml",
               "DocumentMoniker": "C:\\Users\\barte\\Desktop\\Project_Neptune\\PN_groundStation\\PN_Ground_Station\\PN_Ground_Station\\MainWindow.xaml",
               "RelativeDocumentMoniker": "PN_Ground_Station\\MainWindow.xaml",
@@ -132,7 +117,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 6,
               "Title": "MainWindow.xaml.cs",
               "DocumentMoniker": "C:\\Users\\barte\\Desktop\\Project_Neptune\\PN_groundStation\\PN_Ground_Station\\PN_Ground_Station\\MainWindow.xaml.cs",
               "RelativeDocumentMoniker": "PN_Ground_Station\\MainWindow.xaml.cs",

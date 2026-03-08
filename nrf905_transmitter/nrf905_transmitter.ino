@@ -105,7 +105,7 @@ uint32_t rxCount = 0;
 uint32_t txCount = 0;
 bool autoMode = true;
 unsigned long lastBoatCommand = 0;  // Watchdog: czas ostatniej komendy WSAD
-const unsigned long BOAT_WATCHDOG_MS = 500;  // STOP jeśli brak komendy przez 500ms
+const unsigned long BOAT_WATCHDOG_MS = 800;  // STOP jeśli brak komendy przez 800ms
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -211,7 +211,7 @@ void initNRF905() {
 
   SPI.transfer(CMD_W_CONFIG);
   SPI.transfer(108);    // Channel 108 (433.2 MHz)
-  SPI.transfer(0x0C);   // 433MHz, 10dBm
+  SPI.transfer(0x0F);   // 433MHz, 10dBm
   SPI.transfer(0x44);   // 4-byte addresses
   SPI.transfer(32);     // RX payload width
   SPI.transfer(32);     // TX payload width

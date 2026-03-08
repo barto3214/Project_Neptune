@@ -38,7 +38,7 @@ IN1 → GPIO 17 (pin 11)
 IN2 → GPIO 27 (pin 13)
 IN3 → GPIO 22 (pin 15)
 IN4 → GPIO 23 (pin 16)
-VCC → 5V Raspberry Pi
+VCC → 5V zewnętrzne (NIE z pinu RPi - za duży prąd!)
 GND → GND
 
 Servo MG995:
@@ -46,6 +46,7 @@ VCC (czerwony) → zewnętrzne 5V (NIE z pinu RPi - za duży prąd!)
 GND (brązowy) → GND (wspólna masa z RPi)
 SIG (pomarańczowy) → GPIO 18 (pin 12, PWM)
 
+//NIETESTOWANE ALE CHYBA GIT 
 Przekaźniki pomp:
 MOSFET VIN+   →  GPIO 24 (pompa 1) / GPIO 25 (pompa 2)
 MOSFET VIN-   →  GND RPi
@@ -100,6 +101,7 @@ Pin 9 → GPIO21(Pin 40)
 
 ZAJĘTE PINY RPi: 10 pinów fizycznych
 
+//Nietestowane
 ┌──────────────────────────────────────────────────────────┐
 │           Arduino Nano (łódka)    →     Cytron MDD20A    					│
 ├──────────────────────────────────────────────────────────┤

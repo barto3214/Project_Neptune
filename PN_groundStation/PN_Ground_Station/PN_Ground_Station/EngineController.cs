@@ -23,7 +23,7 @@ namespace PN_Ground_Station
         private int _lastRight = 100;
 
         // Prędkości (0–100)
-        private const int SPEED_FULL = 80;   // % przy jeździe prosto
+        private const int SPEED_FULL = 90;   // % przy płynięciu prosto
         private const int SPEED_OUTER = 80;   // % zewnętrzny silnik przy skręcie
         private const int SPEED_INNER = 20;   // % wewnętrzny silnik przy skręcie
         private const int SPEED_STOP = 100;  // Wartość "stop" w protokole (offset 100)
@@ -84,10 +84,11 @@ namespace PN_Ground_Station
             {
                 try
                 {
+                    bool anyKeyPressed;
+                    lock (_keyLock) anyKeyPressed = _pressedKeys.Count > 0;
                     var (left, right) = ComputeSpeeds();
 
-                    // Wyślij tylko jeśli zmiana — oszczędza przepustowość NRF905
-                    if (left != _lastLeft || right != _lastRight)
+                    if (left != _lastLeft || right != _lastRight || anyKeyPressed)
                     {
                         await SendDriveCommand(left, right);
                         _lastLeft = left;

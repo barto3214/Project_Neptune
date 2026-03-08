@@ -861,7 +861,7 @@ def main():
     print("=" * 60)
     print()
     print("Oczekiwanie na komendy z Arduino...")
-    print("Komendy: MEASURE:duration, STOP, PUMP_ON, PUMP_OFF, GET_DATA, STATUS")
+    print("Komendy: MEASURE:duration, STOP, PUMP_ON, PUMP_OFF, GET_DATA, STATUS,LOADING_SAMPLES,REJECT_SAMPLES")
     print("Ctrl+C aby zakończyć")
     print()
 
