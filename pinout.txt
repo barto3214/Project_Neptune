@@ -2,8 +2,8 @@ ADS1115 do RP
 
 VDD → 3.3V
 GND → GND
-SCL → GPIO 3 (SCL)
-SDA → GPIO 2 (SDA)
+SCL + SCL z Czujnik prądu INA219 dwukierunkowy(na sole dokumentu) → GPIO 3 (SCL)
+SDA + SDA z Czujnik prądu INA219 dwukierunkowy(na sole dokumentu) → GPIO 2 (SDA)
 
 
 Czujnik pH:
@@ -121,6 +121,10 @@ ZAJĘTE PINY RPi #2: GPIO 2,3,4,17,18,22,23,24,25,27 + USB
 ZAJĘTE PINY RPi #1: GPIO 8,9,10,11,17,22,27
 
 
-
-
-
+Czujnik prądu INA219 dwukierunkowy
+VCC → 3.3V
+GND → GND na Raspberry pi + "-" z sieci której prąd mierzymy 
+VIN +(zielone gniazdo) → zostawić wolne
+VIN -(zielone gniazdo) → GPIO20(Pin 38)
+VIN + → ZOSTAW WOLNE
+VIN - → ZOSTAW WOLNE
