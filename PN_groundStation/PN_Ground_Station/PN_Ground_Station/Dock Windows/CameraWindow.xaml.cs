@@ -72,7 +72,7 @@ namespace PN_Ground_Station.DockWindows
         {
             try
             {
-                // Otwórz połączenie HTTP — to połączenie nigdy się nie zamknie
+                // Otwórz połączenie HTTP — połączenie stałe
                 using var response = await _httpClient.GetAsync(
                     url,
                     HttpCompletionOption.ResponseHeadersRead,
@@ -84,7 +84,6 @@ namespace PN_Ground_Station.DockWindows
                 var buffer = new byte[65536]; // 64KB bufor odczytu
                 var accum = new MemoryStream();
 
-                // Znaczniki początku i końca JPEG-a
                 byte[] SOI = { 0xFF, 0xD8 }; // Start Of Image
                 byte[] EOI = { 0xFF, 0xD9 }; // End Of Image
 
@@ -121,7 +120,6 @@ namespace PN_Ground_Station.DockWindows
             }
             catch (OperationCanceledException)
             {
-                // Normalne zatrzymanie — nic nie rób
             }
             catch (Exception ex)
             {

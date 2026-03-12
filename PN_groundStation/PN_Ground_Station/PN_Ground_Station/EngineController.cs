@@ -53,7 +53,7 @@ namespace PN_Ground_Station
             IsActive = false;
             _cts.Cancel();
             lock (_keyLock) _pressedKeys.Clear();
-            _ = SendDriveCommand(SPEED_STOP, SPEED_STOP);  // STOP
+            _ = SendDriveCommand(SPEED_STOP, SPEED_STOP);  
         }
 
        

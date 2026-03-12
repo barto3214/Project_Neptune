@@ -29,7 +29,8 @@
                                     Background="Transparent"
                                     DisableAnimations="True">
                     <lvc:CartesianChart.AxisY>
-                        <lvc:Axis Title="pH" Foreground="#CCCCCC"></lvc:Axis>
+                        <lvc:Axis Title="pH" Foreground="#CCCCCC"
+              LabelFormatter="{Binding PhFormatter}"/>
                     </lvc:CartesianChart.AxisY>
                     <lvc:CartesianChart.AxisX>
                         <lvc:Axis Title="Time" Foreground="#CCCCCC"></lvc:Axis>
@@ -54,7 +55,7 @@
                                     Background="Transparent"
                                     DisableAnimations="True">
                     <lvc:CartesianChart.AxisY>
-                        <lvc:Axis Title="TDS (ppm)" Foreground="#CCCCCC"></lvc:Axis>
+                        <lvc:Axis Title="TDS (ppm)" Foreground="#CCCCCC" LabelFormatter="{Binding TdsFormatter}"></lvc:Axis>
                     </lvc:CartesianChart.AxisY>
                     <lvc:CartesianChart.AxisX>
                         <lvc:Axis Title="Time" Foreground="#CCCCCC"></lvc:Axis>
@@ -79,7 +80,7 @@
                                     Background="Transparent"
                                     DisableAnimations="True">
                     <lvc:CartesianChart.AxisY>
-                        <lvc:Axis Title="°C" Foreground="#CCCCCC"></lvc:Axis>
+                        <lvc:Axis Title="°C" Foreground="#CCCCCC" LabelFormatter="{Binding TempFormatter}"></lvc:Axis>
                     </lvc:CartesianChart.AxisY>
                     <lvc:CartesianChart.AxisX>
                         <lvc:Axis Title="Time" Foreground="#CCCCCC"></lvc:Axis>
@@ -104,7 +105,7 @@
                                     Background="Transparent"
                                     DisableAnimations="True">
                     <lvc:CartesianChart.AxisY>
-                        <lvc:Axis Title="µS/cm" Foreground="#CCCCCC"></lvc:Axis>
+                        <lvc:Axis Title="µS/cm" Foreground="#CCCCCC" LabelFormatter="{Binding CondFormatter}"></lvc:Axis>
                     </lvc:CartesianChart.AxisY>
                     <lvc:CartesianChart.AxisX>
                         <lvc:Axis Title="Time" Foreground="#CCCCCC"></lvc:Axis>

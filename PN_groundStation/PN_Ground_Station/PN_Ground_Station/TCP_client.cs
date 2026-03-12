@@ -91,7 +91,6 @@ namespace PN_Ground_Station
                         // Sprawdź typ wiadomości
                         if (jsonData.status != null)
                         {
-                            // To jest odpowiedź na komendę (status message)
                             string status = (string)jsonData.status;
                             string message = jsonData.message != null ? (string)jsonData.message : "";
 
@@ -100,7 +99,7 @@ namespace PN_Ground_Station
                             continue;
                         }
 
-                        // To są dane z czujników - muszą mieć station_id
+                        
                         if (jsonData.station_id == null)
                         {
                             System.Diagnostics.Debug.WriteLine($"[RX] Ignoring message without station_id: {line}");
@@ -160,7 +159,7 @@ namespace PN_Ground_Station
 
             try
             {
-                // Przygotuj JSON command
+                
                 var commandObj = new
                 {
                     command = command.ToLower(),
@@ -171,7 +170,7 @@ namespace PN_Ground_Station
 
                 string json = JsonConvert.SerializeObject(commandObj);
 
-                // Wyślij (z newline na końcu)
+                
                 await _writer.WriteLineAsync(json);
                 await _writer.FlushAsync();
 

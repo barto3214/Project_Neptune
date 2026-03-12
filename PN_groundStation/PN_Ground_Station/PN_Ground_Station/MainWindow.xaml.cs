@@ -184,7 +184,7 @@ namespace PN_Ground_Station
                 txtStatusMessage.Text = data.ToString();
 
                 // Update dock windows with new data
-                _chartsWindow?.AddDataPoint(data.Timestamp, data.Ph, data.Tds, data.Temperature, data.Conductivity);
+                _chartsWindow?.AddDataPoint(_packetCount, data.Ph, data.Tds, data.Temperature, data.Conductivity);
                 _dataGridWindow?.AddData(data);
                 _controlsWindow?.UpdateLatestData(data);
             });

@@ -20,7 +20,7 @@ ENC_A = 16
 ENC_B = 20
 ENC_I = 21
 
-STEP_DELAY = 0.002  # opóźnienie kroków
+STEP_DELAY = 0.002  
 
 # === SEKWENCJA KROKÓW ===
 HALF_STEP_SEQ = [
@@ -113,7 +113,7 @@ def rotate_by_ticks(target_ticks, direction=1, timeout=10.0):
 def main():
     servo_up = 11.7
     servo_down = 2.5
-    ticks_per_pos = 164  # przykładowa wartość, można kalibrować
+    ticks_per_pos = 164  
 
     try:
         while True:

@@ -1,6 +1,6 @@
 /*
  * ARDUINO - STACJA POMIAROWA (Remote Station)
- * Full Duplex: Odbiera komendy z RPi#1, przekazuje do RPi#2 przez Serial
+ * Half Duplex: Odbiera komendy z RPi#1, przekazuje do RPi#2 przez Serial
  *              Odbiera dane z RPi#2 przez Serial, transmituje do RPi#1 przez NRF905
  * 
  * Pinout:
@@ -98,8 +98,8 @@ CommandPacket cmdPacket;
 
 unsigned long lastRxCheck       = 0;
 unsigned long lastDataTransmit  = 0;
-const unsigned long RX_CHECK_INTERVAL      = 50;    // co 50ms
-const unsigned long DATA_TRANSMIT_INTERVAL = 2000;  // co 2s
+const unsigned long RX_CHECK_INTERVAL      = 50;    // 50ms
+const unsigned long DATA_TRANSMIT_INTERVAL = 2000;  // 2s
 
 uint32_t rxCount = 0;
 uint32_t txCount = 0;
@@ -141,7 +141,7 @@ void setup() {
   delay(150);
 
   if (!testSPI()) {
-    while(1);  // zatrzymaj jeśli SPI nie działa
+    while(1);  // stop jeśli SPI nie działa
   }
 
   initNRF905();
@@ -179,7 +179,7 @@ void loop() {
   if (lastBoatCommand > 0 && millis() - lastBoatCommand >= BOAT_WATCHDOG_MS) {
     setMotor(MOTOR_LEFT_PWM,  MOTOR_LEFT_DIR,  0);
     setMotor(MOTOR_RIGHT_PWM, MOTOR_RIGHT_DIR, 0);
-    lastBoatCommand = 0;  // Resetuj żeby nie spamować
+    lastBoatCommand = 0;  
   }
 }
 
@@ -211,7 +211,7 @@ void initNRF905() {
 
   SPI.transfer(CMD_W_CONFIG);
   SPI.transfer(108);    // Channel 108 (433.2 MHz)
-  SPI.transfer(0x0F);   // 433MHz, 10dBm
+  SPI.transfer(0x0C);   // 433MHz, 10dBm
   SPI.transfer(0x44);   // 4-byte addresses
   SPI.transfer(32);     // RX payload width
   SPI.transfer(32);     // TX payload width
@@ -236,7 +236,7 @@ void initNRF905() {
   SPI.endTransaction();
   delay(50);
 
-  // Wyczyść bufory
+  // Czyszczenie buforów
   for (int i = 0; i < 5; i++) {
     SPI.beginTransaction(nrf905_spi);
     digitalWrite(NRF905_CSN, LOW);
@@ -281,7 +281,7 @@ void checkForCommands() {
   digitalWrite(NRF905_CSN, HIGH);
   SPI.endTransaction();
 
-  // Weryfikuj CRC
+  // Weryfikacja CRC
   memcpy(&cmdPacket, buffer, sizeof(CommandPacket));
   uint8_t calculatedCRC = calculateCRC(buffer, 31);
   if (calculatedCRC != cmdPacket.crc) return;
@@ -291,7 +291,6 @@ void checkForCommands() {
 }
 
 void processCommand(uint8_t cmd, uint16_t param1, uint16_t param2) {
-  // Tylko komendy dla RPi#2 — żadnych debugowych printów przez Serial
   switch (cmd) {
     case CMD_MEASURE_START:
       Serial.print(F("MEASURE:"));
@@ -330,7 +329,7 @@ void processCommand(uint8_t cmd, uint16_t param1, uint16_t param2) {
       int rightSpeed = (int)param2 - 100;  // -100..+100
       setMotor(MOTOR_LEFT_PWM,  MOTOR_LEFT_DIR,  leftSpeed);
       setMotor(MOTOR_RIGHT_PWM, MOTOR_RIGHT_DIR, rightSpeed);
-      lastBoatCommand = millis();  // Odśwież watchdog
+      lastBoatCommand = millis();  
       break;
     }
   }
@@ -346,7 +345,7 @@ void processSerialData() {
   String line = Serial.readStringUntil('\n');
   line.trim();
   
-  // DEBUG - użyj LED (bo Serial.print idzie do RPi#2)
+
   if (line.length() > 0) {
     digitalWrite(LED_BUILTIN, HIGH);
     delay(50);
@@ -354,7 +353,7 @@ void processSerialData() {
   }
 
   if (line.startsWith("DATA:")) {
-    line = line.substring(5);  // Usuń "DATA:"
+    line = line.substring(5);  
 
     int idx1 = line.indexOf(',');
     int idx2 = line.indexOf(',', idx1 + 1);
@@ -379,9 +378,9 @@ void processSerialData() {
     digitalWrite(LED_BUILTIN, LOW);
   }
 
-  else if (line.startsWith("STATUS:")) {
-    // TODO: parsuj status i przekaż do RPi#1(opcjonalne)
-  }
+  // else if (line.startsWith("STATUS:")) {
+    
+  // }
 }
 
 void transmitData() {

@@ -1,6 +1,5 @@
 import time
 
-# ID Twojego czujnika
 SENSOR_ID = '28-000010aa60a2'
 device_file = f'/sys/bus/w1/devices/{SENSOR_ID}/w1_slave'
 
@@ -8,9 +7,7 @@ def read_temp():
     with open(device_file, 'r') as f:
         lines = f.readlines()
     
-    # Sprawdź czy są 2 linie i czy odczyt OK
     if len(lines) >= 2 and 'YES' in lines[0]:
-        # Znajdź temperaturę
         temp_pos = lines[1].find('t=')
         if temp_pos != -1:
             temp_string = lines[1][temp_pos+2:].strip()

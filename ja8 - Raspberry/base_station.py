@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 NRF905 TRANSCEIVER - Raspberry Pi #1 (Stacja Bazowa)
-FULL DUPLEX: Odbiera dane + Wysyła komendy
+HALF DUPLEX: Odbiera dane + Wysyła komendy
 
 Funkcje:
 1. TCP Server (port 5000) - komunikacja z WPF
@@ -69,7 +69,7 @@ class CommandPacket:
         struct.pack_into('<H', data, 3, self.param2)  # 2 bajty
         struct.pack_into('<I', data, 5, self.timestamp)  # 4 bajty
         
-        # CRC (ostatni bajt)
+        # CRC (ostatni bajt(sprawdzający))
         data[31] = self.calculate_crc(data[:31])
         return bytes(data)
     
@@ -150,11 +150,11 @@ class SensorData:
 
 
 class NRF905Transceiver:
-    """Full Duplex NRF905 - RX i TX"""
+    """Half Duplex NRF905 - RX i TX"""
     
     def __init__(self):
         print("=" * 60)
-        print("NRF905 TRANSCEIVER - FULL DUPLEX")
+        print("NRF905 TRANSCEIVER - HALF DUPLEX")
         print("=" * 60)
         print()
         
@@ -512,8 +512,8 @@ def main():
     """Główna pętla programu"""
     print()
     print("=" * 60)
-    print("STACJA BAZOWA - Full Duplex System")
-    print("Raspberry Pi + NRF905 ↔ Arduino ↔ Raspberry Pi")
+    print("STACJA BAZOWA - Half Duplex System")
+    print("PC + Raspberry Pi + NRF905 ↔ NRF905 + Arduino + Raspberry Pi")
     print("=" * 60)
     print()
     

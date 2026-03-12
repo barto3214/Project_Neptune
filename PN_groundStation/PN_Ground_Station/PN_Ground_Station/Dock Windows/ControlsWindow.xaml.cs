@@ -21,7 +21,7 @@ namespace PN_Ground_Station.DockWindows
             this.KeyDown += _boat.OnKeyDown;
             this.KeyUp += _boat.OnKeyUp;
 
-            // aktywuje klawiaturę
+            // aktywacja klawiatury
             this.MouseDown += (s, e) => this.Focus();
         }
 
@@ -74,7 +74,7 @@ namespace PN_Ground_Station.DockWindows
             else
             {
                 _boat.Activate();
-                this.Focus();  // Daj focus żeby klawiatura działała od razu
+                this.Focus();  
                 btnBoatToggle.Content = "⏹  Deactivate WSAD Control";
                 btnBoatToggle.Background = System.Windows.Media.Brushes.DarkGreen;
                 txtBoatStatus.Text = "● ACTIVE — use WSAD to steer";

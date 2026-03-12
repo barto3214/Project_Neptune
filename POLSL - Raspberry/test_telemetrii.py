@@ -88,7 +88,6 @@ else:
     print(f"  ✗ Moduł wymusza pasmo 433MHz")
     band_868_ok = False
 
-# Wnioski
 print("\n" + "=" * 60)
 print("WYNIK:")
 print("=" * 60)

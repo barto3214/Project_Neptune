@@ -1,6 +1,6 @@
 ADS1115 do RP
 
-VDD → 3.3V
+VCC → 3.3V
 GND → GND
 SCL + SCL z Czujnik prądu INA219 dwukierunkowy(na sole dokumentu) → GPIO 3 (SCL)
 SDA + SDA z Czujnik prądu INA219 dwukierunkowy(na sole dokumentu) → GPIO 2 (SDA)
@@ -46,7 +46,7 @@ VCC (czerwony) → zewnętrzne 5V (NIE z pinu RPi - za duży prąd!)
 GND (brązowy) → GND (wspólna masa z RPi)
 SIG (pomarańczowy) → GPIO 18 (pin 12, PWM)
 
-//NIETESTOWANE ALE CHYBA GIT 
+
 Przekaźniki pomp:
 MOSFET VIN+   →  GPIO 24 (pompa 1) / GPIO 25 (pompa 2)
 MOSFET VIN-   →  GND RPi

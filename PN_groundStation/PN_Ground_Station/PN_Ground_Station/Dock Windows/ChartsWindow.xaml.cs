@@ -12,6 +12,10 @@ namespace PN_Ground_Station.DockWindows
         public SeriesCollection TdsSeries { get; set; }
         public SeriesCollection TempSeries { get; set; }
         public SeriesCollection CondSeries { get; set; }
+        public Func<double, string> PhFormatter { get; set; } = val => val.ToString("F2");
+        public Func<double, string> TdsFormatter { get; set; } = val => val.ToString("F1");
+        public Func<double, string> TempFormatter { get; set; } = val => val.ToString("F1");
+        public Func<double, string> CondFormatter { get; set; } = val => val.ToString("F0");
 
         public ChartsWindow()
         {
@@ -67,23 +71,20 @@ namespace PN_Ground_Station.DockWindows
             };
         }
 
-        // Przykładowa metoda do dodawania danych
         public void AddDataPoint(double time, double ph, double tds, double temp, double cond)
         {
-            if (PhSeries[0].Values.Count > 49 || TdsSeries[0].Values.Count > 49 || TempSeries[0].Values.Count > 49 || CondSeries[0].Values.Count > 49)
+            if (PhSeries[0].Values.Count >= 50)
             {
                 PhSeries[0].Values.RemoveAt(0);
                 TdsSeries[0].Values.RemoveAt(0);
                 TempSeries[0].Values.RemoveAt(0);
                 CondSeries[0].Values.RemoveAt(0);
             }
-            else
-            {
-                PhSeries[0].Values.Add(new ObservablePoint(time, ph));
-                TdsSeries[0].Values.Add(new ObservablePoint(time, tds));
-                TempSeries[0].Values.Add(new ObservablePoint(time, temp));
-                CondSeries[0].Values.Add(new ObservablePoint(time, cond));
-            }
+
+            PhSeries[0].Values.Add(new ObservablePoint(time, ph));
+            TdsSeries[0].Values.Add(new ObservablePoint(time, tds));
+            TempSeries[0].Values.Add(new ObservablePoint(time, temp));
+            CondSeries[0].Values.Add(new ObservablePoint(time, cond));
         }
     }
 }

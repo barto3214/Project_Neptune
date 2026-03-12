@@ -31,7 +31,7 @@ def read_ph_avg(samples=20):
         readings.append(voltage_to_ph(chan_ph.voltage))
         time.sleep(0.05)
     readings.sort()
-    # Odrzuć 20% z góry i z dołu (po 4 wartości)
+    # Odrzuć skrajne wartości (20% z każdej strony)
     cut = samples // 5
     trimmed = readings[cut:-cut]
     return sum(trimmed) / len(trimmed)

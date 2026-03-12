@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PN_Ground_StationTests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6abdf1b9e9554f2010e0881640bc221a1a38101e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+283fdd19f4783046643ae0462c29ac514e9d4c2f")]
 [assembly: System.Reflection.AssemblyProductAttribute("PN_Ground_StationTests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PN_Ground_StationTests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

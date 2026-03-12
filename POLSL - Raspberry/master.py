@@ -40,6 +40,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from adafruit_extended_bus import ExtendedI2C as I2C
 from adafruit_ads1x15.ads1115 import ADS1115
 from adafruit_ads1x15.analog_in import AnalogIn
+from adafruit_ina219 import INA219
 from dataclasses import dataclass
 import db_manager 
 import RPi.GPIO as GPIO
@@ -61,6 +62,9 @@ PUMP_1_MAX_TIME = 30.0 # Maksymalny czas pracy pompy 1 (żeby nie rozsadziło) T
 # === I2C ===
 i2c = I2C(1)
 ads = ADS1115(i2c)
+
+# === INA219 - NAPIĘCIE BATERII ===
+ina219 = INA219(i2c)
 
 chan_ph  = AnalogIn(ads, 0)  # A0 - czujnik pH
 chan_ec  = AnalogIn(ads, 1)  # A1 - czujnik przewodności
@@ -118,24 +122,22 @@ TOTAL_POSITIONS = 6
 STEPS_PER_POSITION = 43  # Liczba kroków — używana jako backup gdy enkoder wyłączony
 
 # Pozycje servo
-SERVO_UP = 11.7    # Duty cycle % dla pozycji górnej 
-SERVO_DOWN = 2.5  # Duty cycle % dla pozycji dolnej 
+SERVO_UP = 2.5    # Duty cycle % dla pozycji górnej 
+SERVO_DOWN = 11.7  # Duty cycle % dla pozycji dolnej 
 
 # === ENKODER HEDL-5540 ===
-
-#              Pin5(GREEN)→GPIO16, Pin7(VIOLET)→GPIO20, Pin9(WHITE)→GPIO21
 ENC_A               = 16    # GPIO 16 (PIN 36) - kanał A
 ENC_B               = 20    # GPIO 20 (PIN 38) - kanał B
 ENC_I               = 21    # GPIO 21 (PIN 40) - index (jeden impuls/obrót)
 ENCODER_ENABLED     = True  # False = tryb krokowy bez enkodera
-TICKS_PER_POSITION  = 165   # TODO: USTAWIĆ Z KALIBRACJI (kalibracja.py opcja 3)
-ENCODER_TOLERANCE   = 2     # Dopuszczalny błąd pozycji w tickach
+TICKS_PER_POSITION  = 165   # liczba ticków enkodera na jedną pozycję karuzeli 
+ENCODER_TOLERANCE   = 3     # Dopuszczalny błąd pozycji w tickach
 ENCODER_MAX_RETRIES = 3     # Ile razy próbować korekty zanim się podda
 ENCODER_TIMEOUT     = 15.0  # Max sekund na jeden obrót
 
-# Licznik ticków enkodera — aktualizowany przez wątek pollingu
+# Licznik ticków enkodera 
 _enc_tick_count = 0
-_enc_last_a     = 0  # poprzedni stan kanału A (do detekcji zbocza przez polling)
+_enc_last_a     = 0  # poprzedni stan kanału A 
 
 # ============================================================
 # KONFIGURACJA KAMERY
@@ -533,7 +535,11 @@ def send_data():
 
 def send_status():
     if ser and ser.is_open:
-        battery_mv  = 3700  # TODO: Odczyt napięcia baterii
+        # Odczyt napięcia baterii przez INA219
+        try:
+            battery_mv = int(ina219.bus_voltage * 1000)
+        except Exception:
+            battery_mv = 0
         error_flags = 0
         status_str  = f"STATUS:OK,{battery_mv},{error_flags}\n"
         try:
@@ -672,10 +678,10 @@ def _rotate_ticks(target_ticks, direction=1, delay=0.002):
     """
     global _enc_tick_count
 
-    remaining = target_ticks  # ile ticków jeszcze do przejechania
+    remaining = target_ticks  
 
     for attempt in range(ENCODER_MAX_RETRIES):
-        _enc_tick_count = 0  # reset licznika przed każdą próbą
+        _enc_tick_count = 0  
         t0 = time.time()
 
         # Obracaj dopóki enkoder nie zliczy wymaganej liczby ticków
@@ -693,7 +699,7 @@ def _rotate_ticks(target_ticks, direction=1, delay=0.002):
                 time.sleep(delay)
 
         set_step(0, 0, 0, 0)
-        time.sleep(0.05)  # poczekaj aż karuzela się ustabilizuje
+        time.sleep(0.05)  
 
         # Sprawdź błąd pozycji
         final = abs(_enc_tick_count)
@@ -822,7 +828,7 @@ def main():
     print()
     print("=" * 60)
     print("RASPBERRY PI #2 - STACJA POMIAROWA")
-    print("Czujniki + Pompa + Serial do Arduino")
+    print("Czujniki + Pompa + Karuzela + Serial do Arduino")
     print("=" * 60)
     print()
     
@@ -861,7 +867,7 @@ def main():
     print("=" * 60)
     print()
     print("Oczekiwanie na komendy z Arduino...")
-    print("Komendy: MEASURE:duration, STOP, PUMP_ON, PUMP_OFF, GET_DATA, STATUS,LOADING_SAMPLES,REJECT_SAMPLES")
+    print("Komendy: MEASURE:duration, STOP, PUMP_ON, PUMP_OFF, GET_DATA, STATUS")
     print("Ctrl+C aby zakończyć")
     print()
 
