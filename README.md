@@ -396,7 +396,7 @@ Test coverage includes: CRITICAL (pH out of range), UNACCEPTABLE (high TDS), POO
 
 ## Authors
 
-**Ślusarz Bartłomiej, Moj Cyprian, Sot Krzysztof**  
+**Ślusarz Bartłomiej(code), Moj Cyprian(models 3D), Sot Krzysztof(electronics)**  
 Klasa IV, Technik Programista  
 Zespół Szkół nr 10 im. prof. Janusza Groszkowskiego w Zabrzu  
 we współpracy z Politechniką Śląską — Katedra Automatyki i Robotyki (RAU3)
