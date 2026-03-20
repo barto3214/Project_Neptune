@@ -49,10 +49,10 @@ SIG (pomarańczowy) → GPIO 18 (pin 12, PWM)
 
 Przekaźniki pomp:
 MOSFET VIN+   →  12V zasilacz(przetwornica 12V) + 
-MOSFET VIN-   →  GND RPi
+MOSFET VIN-   →  GND przetwornicy 12 V
 
 MOSFET PWM  →  GPIO 24 (pompa 1) / GPIO 25 (pompa 2)
-MOSFET GND-  →  GND przetwornicy 5V(output) (masa wspólna z RPi)
+MOSFET GND-  →  GND przetwornicy 12V(output) (masa wspólna z RPi)
 
 MOSFET OUT+  →  Pompa +
 MOSFET OUT-  →  Pompa -
