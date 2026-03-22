@@ -2,8 +2,8 @@ ADS1115 do RP
 
 VCC → 3.3V
 GND → GND
-SCL + SCL z Czujnik prądu INA219 dwukierunkowy(na sole dokumentu) → GPIO 3 (SCL)
-SDA + SDA z Czujnik prądu INA219 dwukierunkowy(na sole dokumentu) → GPIO 2 (SDA)
+SCL + SCL z Czujnik prądu INA219 dwukierunkowy(na dole dokumentu) → GPIO 3 (SCL)
+SDA + SDA z Czujnik prądu INA219 dwukierunkowy(na dole dokumentu) → GPIO 2 (SDA)
 
 
 Czujnik pH:
@@ -13,6 +13,7 @@ Do → A0 na ADS1115
 
 
 Czujnik przewodności (EC/TDS)(czarna sonda):
+
 
 VCC/V+ → 5V Raspberry Pi
 GND/G → GND
@@ -41,8 +42,8 @@ IN4 → GPIO 23 (pin 16)
 VCC → 5V zewnętrzne (NIE z pinu RPi - za duży prąd!)
 GND → GND
 
-Servo MG995:
-VCC (czerwony) → zewnętrzne 5V (NIE z pinu RPi - za duży prąd!)
+
+ → zewnętrzne 5V (NIE z pinu RPi - za duży prąd!)
 GND (brązowy) → GND (wspólna masa z RPi)
 SIG (pomarańczowy) → GPIO 18 (pin 12, PWM)
 
@@ -128,3 +129,4 @@ VIN +(zielone gniazdo) → zostawić wolne
 VIN -(zielone gniazdo) → GPIO20(Pin 38)
 VIN + → ZOSTAW WOLNE
 VIN - → ZOSTAW WOLNE
+

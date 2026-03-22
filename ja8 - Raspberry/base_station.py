@@ -133,15 +133,16 @@ class SensorData:
     def to_dict(self):
         """Konwertuj do JSON"""
         return {
-            'station_id': self.station_id,
-            'ph': round(self.ph, 2),
-            'tds': round(self.tds, 1),
-            'temperature': round(self.temperature, 1),
-            'conductivity': round(self.conductivity, 0),
-            'timestamp': self.timestamp,
-            'battery_voltage': self.battery_voltage / 1000.0,
-            'pump_state': bool(self.error_flags & 0x01),  # Bit 0 = pump state
-            'received_at': datetime.now().isoformat()
+        'station_id':      self.station_id,
+        'ph':              round(self.ph, 2),
+        'tds':             round(self.tds, 1),
+        'temperature':     round(self.temperature, 1),
+        'conductivity':    round(self.conductivity, 0),
+        'timestamp':       self.timestamp,
+        'battery_voltage': self.battery_voltage / 1000.0,
+        'pump_state':      bool(self.error_flags & 0x01),
+        'packet_type':     'battery' if self.reserved[0] == 0x11 else 'data', 
+        'received_at':     datetime.now().isoformat()
         }
     
     def __str__(self):
@@ -444,10 +445,6 @@ class TCPServer:
         elif command == 'pump_off':
             self.transceiver.transmit_command(CMD_PUMP_OFF)
             response = {'status': 'ok', 'message': 'Pump 1 OFF'}
-            
-        elif command == 'status':
-            self.transceiver.transmit_command(CMD_STATUS_REQUEST)
-            response = {'status': 'ok', 'message': 'Status request sent'}
 
         elif command == 'samples_loading':
             self.transceiver.transmit_command(CMD_SAMPLES_LOADING)

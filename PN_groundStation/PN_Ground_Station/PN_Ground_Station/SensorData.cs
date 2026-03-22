@@ -16,6 +16,7 @@ namespace PN_Ground_Station
         public uint Timestamp { get; set; }
         public double BatteryVoltage { get; set; }
         public byte ErrorFlags { get; set; }
+        public string PacketType { get; set; } = "data"; 
         public DateTime ReceivedAt { get; set; } = DateTime.Now;
 
 

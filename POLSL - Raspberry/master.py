@@ -14,14 +14,13 @@ Komunikacja Serial z Arduino:
   * STOP         - zatrzymaj pomiar
   * PUMP_ON      - włącz pompę
   * PUMP_OFF     - wyłącz pompę
-  * STATUS       - wyślij status
   * SAMPLES_LOADING - wykonaj sekwencję ładowania próbek
   * REJECT_SAMPLE   - wykonaj sekwencję odrzutu próbki
   * GET_DATA     - wyślij aktualne dane
 
 - Dane wysyłane (do Arduino):
   * DATA:7.2,350,22.5,700,1\n  (pH,TDS,Temp,Cond,Pump)
-  * STATUS:OK,3700,0\n         (Status,BatteryMv,ErrorFlags)
+  * STATUS BATERII:OK,BatteryMv,0\n         (Status,BatteryMv,ErrorFlags)
 
 Stream kamery:
   * http://<IP>:8080/stream    - MJPEG stream dla WPF
@@ -346,6 +345,7 @@ def camera_capture_loop():
                     _frame_event.clear()
 
         except Exception as e:
+            print(f"[CAM] Proces kamery zakończony: {e}")
             print(f"[CAM] Błąd: {e} — restart za 2s")
             time.sleep(2)
 
@@ -533,20 +533,19 @@ def send_data():
         except Exception as e:
             print(f"Błąd wysyłania: {e}")
 
-def send_status():
-    if ser and ser.is_open:
-        # Odczyt napięcia baterii przez INA219
-        try:
-            battery_mv = int(ina219.bus_voltage * 1000)
-        except Exception:
-            battery_mv = 0
-        error_flags = 0
-        status_str  = f"STATUS:OK,{battery_mv},{error_flags}\n"
-        try:
-            ser.write(status_str.encode('utf-8'))
-            print(f"Status: {status_str.strip()}")
-        except Exception as e:
-            print(f"Błąd wysyłania statusu: {e}")
+def send_battery_loop():
+    while True:
+        time.sleep(10)
+        if ser and ser.is_open:
+            try:
+                battery_mv = int(ina219.bus_voltage * 1000)
+            except Exception:
+                battery_mv = 0
+            try:
+                ser.write(f"BATTERY:{battery_mv}\n".encode('utf-8'))
+                print(f"Bateria: {battery_mv}mV ({battery_mv/1000:.2f}V)")
+            except Exception as e:
+                print(f"Błąd wysyłania statusu baterii: {e}")
 
 def process_command(command, GPIO=None):
     global measuring, measurement_start_time, measurement_duration, last_measure_time
@@ -584,8 +583,6 @@ def process_command(command, GPIO=None):
     elif command == "PUMP_OFF":
         control_pump_1(False, GPIO)
 
-    elif command == "STATUS":
-        send_status()
 
     elif command == "SAMPLES_LOADING":
         threading.Thread(target=loading_sequence, daemon=True).start()
@@ -850,6 +847,9 @@ def main():
     db_manager.init_database()
     db_thread = threading.Thread(target=db_manager.database_worker, daemon=True)
     db_thread.start()
+    
+    battery_thread = threading.Thread(target=send_battery_loop, daemon=True)
+    battery_thread.start()
 
     # Wątki kamery
     if CAM_ENABLED:
@@ -867,7 +867,7 @@ def main():
     print("=" * 60)
     print()
     print("Oczekiwanie na komendy z Arduino...")
-    print("Komendy: MEASURE:duration, STOP, PUMP_ON, PUMP_OFF, GET_DATA, STATUS")
+    print("Komendy: MEASURE:duration, STOP, PUMP_ON, PUMP_OFF, GET_DATA")
     print("Ctrl+C aby zakończyć")
     print()
 

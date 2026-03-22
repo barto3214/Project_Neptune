@@ -18,6 +18,9 @@ namespace PN_Ground_Station
         private readonly TcpDataClient _tcpClient;
         private readonly List<SensorData> _dataHistory = new();
         private int _packetCount = 0;
+        private const double BATTERY_MIN_V = 12.8;
+        private const double BATTERY_MAX_V = 16.8;
+
 
         // Dock window references
         private ChartsWindow? _chartsWindow;
@@ -38,7 +41,26 @@ namespace PN_Ground_Station
             Loaded += Window_Loaded;
             Closing += Window_Closing;
         }
+        
+        private void UpdateBatteryIndicator(double voltageV)
+        {
+            double percent = Math.Clamp(
+                (voltageV - BATTERY_MIN_V) / (BATTERY_MAX_V - BATTERY_MIN_V) * 100.0,
+                0, 100);
 
+            
+            BatteryFill.Width = 29.0 * (percent / 100.0);
+
+            BatteryFill.Fill = new SolidColorBrush(percent switch
+            {
+                > 50 => Color.FromRgb(0x4C, 0xAF, 0x50),  // zielony
+                > 20 => Color.FromRgb(0xFF, 0xC1, 0x07),  // żółty
+                _ => Color.FromRgb(0xF4, 0x43, 0x36)   // czerwony
+            });
+
+            BatteryPercentText.Text = $"{percent:F0}%";
+            BatteryVoltageText.Text = $"({voltageV:F2}V)";
+        }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             System.Diagnostics.Debug.WriteLine("=== Window_Loaded START ===");
@@ -168,25 +190,26 @@ namespace PN_Ground_Station
 
         private void OnDataReceived(object? sender, SensorData data)
         {
-            // Execute on UI thread
             Dispatcher.Invoke(() =>
             {
-                _packetCount++;
-                _dataHistory.Add(data);
+                UpdateBatteryIndicator(data.BatteryVoltage);
 
-                // Keep only last 50 records for charts
-                if (_dataHistory.Count > 50)
-                    _dataHistory.RemoveAt(0);
+                if (data.PacketType != "battery")
+                {
+                    _packetCount++;
+                    _dataHistory.Add(data);
 
-                // Update status bar
-                txtLastDataTime.Text = data.ReceivedAt.ToString("HH:mm:ss");
-                txtPacketCount.Text = _packetCount.ToString();
-                txtStatusMessage.Text = data.ToString();
+                    if (_dataHistory.Count > 50)
+                        _dataHistory.RemoveAt(0);
 
-                // Update dock windows with new data
-                _chartsWindow?.AddDataPoint(_packetCount, data.Ph, data.Tds, data.Temperature, data.Conductivity);
-                _dataGridWindow?.AddData(data);
-                _controlsWindow?.UpdateLatestData(data);
+                    txtLastDataTime.Text = data.ReceivedAt.ToString("HH:mm:ss");
+                    txtPacketCount.Text = _packetCount.ToString();
+                    txtStatusMessage.Text = data.ToString();
+
+                    _chartsWindow?.AddDataPoint(_packetCount, data.Ph, data.Tds, data.Temperature, data.Conductivity);
+                    _dataGridWindow?.AddData(data);
+                    _controlsWindow?.UpdateLatestData(data);
+                }
             });
         }
 

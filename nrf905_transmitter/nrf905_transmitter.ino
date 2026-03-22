@@ -148,10 +148,10 @@ void setup() {
   enterRXMode();
 
   // Inicjalizacja danych
-  sensorData.stationID      = 1;
-  sensorData.batteryVoltage = 3700;
-  sensorData.errorFlags     = 0;
+  sensorData.stationID  = 1;
+  sensorData.errorFlags = 0;
   memset(sensorData.reserved, 0, sizeof(sensorData.reserved));
+  sensorData.reserved[0] = 0x10; 
   Serial.setTimeout(10);
 }
 
@@ -311,10 +311,6 @@ void processCommand(uint8_t cmd, uint16_t param1, uint16_t param2) {
       Serial.println(F("PUMP_OFF"));
       break;
 
-    case CMD_STATUS_REQUEST:
-      Serial.println(F("STATUS"));
-      break;
-
     case CMD_SAMPLES_LOADING:           
       Serial.println(F("SAMPLES_LOADING"));
       break;
@@ -368,6 +364,7 @@ void processSerialData() {
       sensorData.errorFlags = line.substring(idx4 + 1).toInt() & 0x01;
       sensorData.timestamp = millis() / 1000;
 
+      sensorData.reserved[0] = 0x10; // PACKET_DATA
       transmitData();
     }
   }
@@ -377,10 +374,16 @@ void processSerialData() {
     delay(1000);
     digitalWrite(LED_BUILTIN, LOW);
   }
-
-  // else if (line.startsWith("STATUS:")) {
-    
-  // }
+  else if (line.startsWith("BATTERY:")) {
+    uint16_t mv = (uint16_t)line.substring(8).toInt();
+    if (mv > 0) {
+        sensorData.batteryVoltage = mv;
+        sensorData.timestamp      = millis() / 1000;
+        sensorData.reserved[0]    = 0x11; // PACKET_BATTERY
+        transmitData();
+        sensorData.reserved[0]    = 0x10; // POWRÓT DO PACKET_DATA
+    }
+}
 }
 
 void transmitData() {
