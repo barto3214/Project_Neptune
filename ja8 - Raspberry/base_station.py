@@ -42,7 +42,7 @@ CMD_MEASURE_START   = 0x01  # Rozpocznij pomiar
 CMD_MEASURE_STOP    = 0x02  # Zatrzymaj pomiar
 CMD_PUMP_ON         = 0x03  # Włącz pompę 1 (napełnianie zbiornika)
 CMD_PUMP_OFF        = 0x04  # Wyłącz pompę 1
-CMD_STATUS_REQUEST  = 0x05  # Zapytaj o status
+CMD_CAMERA_SERVO = 0x05  # Sterowanie serwomechanizmem kamery
 CMD_SAMPLES_LOADING = 0x06  # Sekwencja ładowania próbki (pompa 2)
 CMD_REJECT_SAMPLE   = 0x07  # Odrzut próbki (pompa 2)
 CMD_BOAT_DRIVE      = 0x20  # Napęd łódki: param1=lewy(0-200), param2=prawy(0-200)
@@ -453,6 +453,11 @@ class TCPServer:
         elif command == 'reject_sample':
             self.transceiver.transmit_command(CMD_REJECT_SAMPLE)
             response = {'status': 'ok', 'message': 'Reject sample sequence started'}
+            
+        elif command == 'camera_servo':
+            angle = max(0, min(180, int(param1)))
+            self.transceiver.transmit_command(CMD_CAMERA_SERVO, angle, 0)
+            response = {'status': 'ok', 'message': f'Camera servo: {angle}°'}
 
         elif command == 'boat_drive':
             # param1 = lewy silnik (0-200, 100=stop)

@@ -3,6 +3,14 @@
   "WorkspaceRootPath": "C:\\Users\\barte\\Desktop\\Project_Neptune\\PN_groundStation\\PN_Ground_Station\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{1FAACA26-6A4F-4EBF-8FFD-A8ACC66ADD23}|PN_Ground_Station\\PN_Ground_Station.csproj|c:\\users\\barte\\desktop\\project_neptune\\pn_groundstation\\pn_ground_station\\pn_ground_station\\dock windows\\controlswindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1FAACA26-6A4F-4EBF-8FFD-A8ACC66ADD23}|PN_Ground_Station\\PN_Ground_Station.csproj|solutionrelative:pn_ground_station\\dock windows\\controlswindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1FAACA26-6A4F-4EBF-8FFD-A8ACC66ADD23}|PN_Ground_Station\\PN_Ground_Station.csproj|c:\\users\\barte\\desktop\\project_neptune\\pn_groundstation\\pn_ground_station\\pn_ground_station\\dock windows\\controlswindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{1FAACA26-6A4F-4EBF-8FFD-A8ACC66ADD23}|PN_Ground_Station\\PN_Ground_Station.csproj|solutionrelative:pn_ground_station\\dock windows\\controlswindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{1FAACA26-6A4F-4EBF-8FFD-A8ACC66ADD23}|PN_Ground_Station\\PN_Ground_Station.csproj|c:\\users\\barte\\desktop\\project_neptune\\pn_groundstation\\pn_ground_station\\pn_ground_station\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{1FAACA26-6A4F-4EBF-8FFD-A8ACC66ADD23}|PN_Ground_Station\\PN_Ground_Station.csproj|solutionrelative:pn_ground_station\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -17,10 +25,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{1FAACA26-6A4F-4EBF-8FFD-A8ACC66ADD23}|PN_Ground_Station\\PN_Ground_Station.csproj|c:\\users\\barte\\desktop\\project_neptune\\pn_groundstation\\pn_ground_station\\pn_ground_station\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
       "RelativeMoniker": "D:0:0:{1FAACA26-6A4F-4EBF-8FFD-A8ACC66ADD23}|PN_Ground_Station\\PN_Ground_Station.csproj|solutionrelative:pn_ground_station\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{1FAACA26-6A4F-4EBF-8FFD-A8ACC66ADD23}|PN_Ground_Station\\PN_Ground_Station.csproj|c:\\users\\barte\\desktop\\project_neptune\\pn_groundstation\\pn_ground_station\\pn_ground_station\\dock windows\\controlswindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{1FAACA26-6A4F-4EBF-8FFD-A8ACC66ADD23}|PN_Ground_Station\\PN_Ground_Station.csproj|solutionrelative:pn_ground_station\\dock windows\\controlswindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     }
   ],
   "DocumentGroupContainers": [
@@ -30,7 +34,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Bookmark",
@@ -38,46 +42,20 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "SensorData.cs",
-              "DocumentMoniker": "C:\\Users\\barte\\Desktop\\Project_Neptune\\PN_groundStation\\PN_Ground_Station\\PN_Ground_Station\\SensorData.cs",
-              "RelativeDocumentMoniker": "PN_Ground_Station\\SensorData.cs",
-              "ToolTip": "C:\\Users\\barte\\Desktop\\Project_Neptune\\PN_groundStation\\PN_Ground_Station\\PN_Ground_Station\\SensorData.cs",
-              "RelativeToolTip": "PN_Ground_Station\\SensorData.cs",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAAABIAAAA5AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-22T09:21:11.186Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "MainWindow.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\barte\\Desktop\\Project_Neptune\\PN_groundStation\\PN_Ground_Station\\PN_Ground_Station\\MainWindow.xaml.cs",
-              "RelativeDocumentMoniker": "PN_Ground_Station\\MainWindow.xaml.cs",
-              "ToolTip": "C:\\Users\\barte\\Desktop\\Project_Neptune\\PN_groundStation\\PN_Ground_Station\\PN_Ground_Station\\MainWindow.xaml.cs",
-              "RelativeToolTip": "PN_Ground_Station\\MainWindow.xaml.cs",
-              "ViewState": "AgIAALwAAAAAAAAAAAAuwMMAAAAAAAAAAAAAAA==",
+              "Title": "ControlsWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\barte\\Desktop\\Project_Neptune\\PN_groundStation\\PN_Ground_Station\\PN_Ground_Station\\Dock Windows\\ControlsWindow.xaml.cs",
+              "RelativeDocumentMoniker": "PN_Ground_Station\\Dock Windows\\ControlsWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\barte\\Desktop\\Project_Neptune\\PN_groundStation\\PN_Ground_Station\\PN_Ground_Station\\Dock Windows\\ControlsWindow.xaml.cs",
+              "RelativeToolTip": "PN_Ground_Station\\Dock Windows\\ControlsWindow.xaml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAqAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-22T08:35:05.745Z",
+              "WhenOpened": "2026-03-22T09:43:34.327Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "TCP_client.cs",
-              "DocumentMoniker": "C:\\Users\\barte\\Desktop\\Project_Neptune\\PN_groundStation\\PN_Ground_Station\\PN_Ground_Station\\TCP_client.cs",
-              "RelativeDocumentMoniker": "PN_Ground_Station\\TCP_client.cs",
-              "ToolTip": "C:\\Users\\barte\\Desktop\\Project_Neptune\\PN_groundStation\\PN_Ground_Station\\PN_Ground_Station\\TCP_client.cs",
-              "RelativeToolTip": "PN_Ground_Station\\TCP_client.cs",
-              "ViewState": "AgIAAGIAAAAAAAAAAAAhwHcAAABvAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-22T08:30:35.529Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
               "Title": "ControlsWindow.xaml",
               "DocumentMoniker": "C:\\Users\\barte\\Desktop\\Project_Neptune\\PN_groundStation\\PN_Ground_Station\\PN_Ground_Station\\Dock Windows\\ControlsWindow.xaml",
               "RelativeDocumentMoniker": "PN_Ground_Station\\Dock Windows\\ControlsWindow.xaml",
@@ -89,15 +67,51 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "SensorData.cs",
+              "DocumentMoniker": "C:\\Users\\barte\\Desktop\\Project_Neptune\\PN_groundStation\\PN_Ground_Station\\PN_Ground_Station\\SensorData.cs",
+              "RelativeDocumentMoniker": "PN_Ground_Station\\SensorData.cs",
+              "ToolTip": "C:\\Users\\barte\\Desktop\\Project_Neptune\\PN_groundStation\\PN_Ground_Station\\PN_Ground_Station\\SensorData.cs",
+              "RelativeToolTip": "PN_Ground_Station\\SensorData.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAABIAAAA5AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-22T09:21:11.186Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "MainWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\barte\\Desktop\\Project_Neptune\\PN_groundStation\\PN_Ground_Station\\PN_Ground_Station\\MainWindow.xaml.cs",
+              "RelativeDocumentMoniker": "PN_Ground_Station\\MainWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\barte\\Desktop\\Project_Neptune\\PN_groundStation\\PN_Ground_Station\\PN_Ground_Station\\MainWindow.xaml.cs",
+              "RelativeToolTip": "PN_Ground_Station\\MainWindow.xaml.cs",
+              "ViewState": "AgIAAA8AAAAAAAAAAAA+wCoAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-22T08:35:05.745Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 3,
+              "Title": "TCP_client.cs",
+              "DocumentMoniker": "C:\\Users\\barte\\Desktop\\Project_Neptune\\PN_groundStation\\PN_Ground_Station\\PN_Ground_Station\\TCP_client.cs",
+              "RelativeDocumentMoniker": "PN_Ground_Station\\TCP_client.cs",
+              "ToolTip": "C:\\Users\\barte\\Desktop\\Project_Neptune\\PN_groundStation\\PN_Ground_Station\\PN_Ground_Station\\TCP_client.cs",
+              "RelativeToolTip": "PN_Ground_Station\\TCP_client.cs",
+              "ViewState": "AgIAAGIAAAAAAAAAAAAhwHcAAABvAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-22T08:30:35.529Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
               "Title": "MainWindow.xaml",
               "DocumentMoniker": "C:\\Users\\barte\\Desktop\\Project_Neptune\\PN_groundStation\\PN_Ground_Station\\PN_Ground_Station\\MainWindow.xaml",
               "RelativeDocumentMoniker": "PN_Ground_Station\\MainWindow.xaml",
               "ToolTip": "C:\\Users\\barte\\Desktop\\Project_Neptune\\PN_groundStation\\PN_Ground_Station\\PN_Ground_Station\\MainWindow.xaml",
               "RelativeToolTip": "PN_Ground_Station\\MainWindow.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2026-03-13T13:25:45.119Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-13T13:25:45.119Z"
             }
           ]
         }

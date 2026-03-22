@@ -173,6 +173,59 @@
                     </Grid>
                 </StackPanel>
             </Border>
+            <!-- Camera Servo Section -->
+            <Border Background="#252526" BorderBrush="#3F3F46" BorderThickness="1" 
+        Padding="15" Margin="0,0,0,15">
+                <StackPanel>
+                    <TextBlock Text="📷 Camera Servo" 
+                   Foreground="#CCCCCC" FontSize="16" FontWeight="Bold"
+                   Margin="0,0,0,15"/>
+                    <!-- Status -->
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Status: " Foreground="#999999" FontWeight="Bold"
+                       VerticalAlignment="Center"/>
+                        <TextBlock x:Name="txtCameraStatus" Grid.Column="1"
+                       Text="● INACTIVE" Foreground="#FF4444"
+                       FontWeight="Bold" VerticalAlignment="Center"/>
+                    </Grid>
+                    <!-- Kąt -->
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Angle: " Foreground="#999999" FontWeight="Bold"
+                       VerticalAlignment="Center"/>
+                        <TextBlock x:Name="txtCameraAngle" Grid.Column="1"
+                       Text="90°" Foreground="#CCCCCC"
+                       VerticalAlignment="Center"/>
+                    </Grid>
+                    <!-- Activate/Deactivate -->
+                    <Button x:Name="btnCameraToggle"
+                Content="▶  Activate Camera Control"
+                Height="40" Margin="0,5"
+                Background="#007ACC" Foreground="White" FontWeight="Bold"
+                Click="BtnCameraToggle_Click"/>
+                    <!-- Reset do środka -->
+                    <Button x:Name="btnCameraCenter"
+                Content="⟺  Center (90°)"
+                Height="32" Margin="0,5"
+                Background="#3F3F46" Foreground="White"
+                Click="BtnCameraCenter_Click"/>
+                    <Separator Background="#3F3F46" Margin="0,10"/>
+                    <!-- Keymap info -->
+                    <TextBlock Foreground="#666666" FontSize="11" Margin="0,0,0,4"
+                   Text="Keyboard layout (focus on this panel first):"/>
+                    <StackPanel>
+                        <TextBlock Foreground="#999999" FontSize="11" Text="← — rotate left (−15°)"/>
+                        <TextBlock Foreground="#999999" FontSize="11" Text="→ — rotate right (+15°)"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
 
             <!-- System Info Section -->
             <Border Background="#252526" BorderBrush="#3F3F46" BorderThickness="1" 

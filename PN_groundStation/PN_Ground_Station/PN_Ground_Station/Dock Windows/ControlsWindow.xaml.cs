@@ -10,18 +10,20 @@ namespace PN_Ground_Station.DockWindows
         private readonly TcpDataClient _tcpClient;
         private readonly BoatController _boat;
 
+        private bool _cameraActive = false;
+        private int _cameraAngle = 90;
+        private const int CAMERA_STEP = 15;
+
         public ControlsWindow(TcpDataClient tcpClient)
         {
             InitializeComponent();
-            _tcpClient = tcpClient;                 
+            _tcpClient = tcpClient;
             _boat = new BoatController(_tcpClient);
 
-            // Klawiatura — UserControl musi być focusable
             this.Focusable = true;
-            this.KeyDown += _boat.OnKeyDown;
+            this.KeyDown += OnControlsKeyDown;
             this.KeyUp += _boat.OnKeyUp;
 
-            // aktywacja klawiatury
             this.MouseDown += (s, e) => this.Focus();
         }
 
@@ -40,6 +42,36 @@ namespace PN_Ground_Station.DockWindows
             txtBattery.Text = data.BatteryVoltage.ToString("F2");
             txtBatteryUnit.Text = "V";
             txtQuality.Text = data.GetWaterQuality();
+        }
+
+        // ── Klawiatura (łódka + servo) ────────────────────────────────────────
+
+        private async void OnControlsKeyDown(object sender, KeyEventArgs e)
+        {
+            // Servo — strzałki (tylko gdy camera active)
+            if (_cameraActive)
+            {
+                if (e.Key == Key.Left)
+                {
+                    _cameraAngle = Math.Max(0, _cameraAngle - CAMERA_STEP);
+                    await _tcpClient.SendCommandAsync("camera_servo", _cameraAngle, 0);
+                    txtCameraAngle.Text = $"{_cameraAngle}°";
+                    e.Handled = true;
+                    return;
+                }
+                if (e.Key == Key.Right)
+                {
+                    _cameraAngle = Math.Min(180, _cameraAngle + CAMERA_STEP);
+                    await _tcpClient.SendCommandAsync("camera_servo", _cameraAngle, 0);
+                    txtCameraAngle.Text = $"{_cameraAngle}°";
+                    e.Handled = true;
+                    return;
+                }
+            }
+
+            // Łódka — WSAD (tylko gdy boat active)
+            if (_boat.IsActive)
+                _boat.OnKeyDown(sender, e);
         }
 
         // ── Pompy / Pomiary ───────────────────────────────────────────────────
@@ -74,12 +106,42 @@ namespace PN_Ground_Station.DockWindows
             else
             {
                 _boat.Activate();
-                this.Focus();  
+                this.Focus();
                 btnBoatToggle.Content = "⏹  Deactivate WSAD Control";
                 btnBoatToggle.Background = System.Windows.Media.Brushes.DarkGreen;
                 txtBoatStatus.Text = "● ACTIVE — use WSAD to steer";
                 txtBoatStatus.Foreground = System.Windows.Media.Brushes.LimeGreen;
             }
+        }
+
+        // ── Sterowanie kamerą ─────────────────────────────────────────────────
+
+        private void BtnCameraToggle_Click(object sender, RoutedEventArgs e)
+        {
+            _cameraActive = !_cameraActive;
+            this.Focus();
+
+            if (_cameraActive)
+            {
+                btnCameraToggle.Content = "⏹  Deactivate Camera Control";
+                btnCameraToggle.Background = System.Windows.Media.Brushes.DarkGreen;
+                txtCameraStatus.Text = "● ACTIVE — use ← → to rotate";
+                txtCameraStatus.Foreground = System.Windows.Media.Brushes.LimeGreen;
+            }
+            else
+            {
+                btnCameraToggle.Content = "▶  Activate Camera Control";
+                btnCameraToggle.Background = System.Windows.Media.Brushes.DarkRed;
+                txtCameraStatus.Text = "● INACTIVE";
+                txtCameraStatus.Foreground = System.Windows.Media.Brushes.OrangeRed;
+            }
+        }
+
+        private async void BtnCameraCenter_Click(object sender, RoutedEventArgs e)
+        {
+            _cameraAngle = 90;
+            txtCameraAngle.Text = "90°";
+            await _tcpClient.SendCommandAsync("camera_servo", 90, 0);
         }
 
         // ── Scroll ───────────────────────────────────────────────────────────

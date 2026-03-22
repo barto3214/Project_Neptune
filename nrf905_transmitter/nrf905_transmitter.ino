@@ -10,6 +10,9 @@
  * NRF905 TX_EN-> D7
  * NRF905 DR   -> D5
  * 
+ * Servo kamery:
+ * A0 -> sygnał servo kamery
+ * 
  * Serial do Raspberry Pi #2:
  * Arduino TX  -> RPi RX (GPIO 15, Pin 10)
  * Arduino RX  -> RPi TX (GPIO 14, Pin 8)
@@ -28,6 +31,7 @@
  */
 
 #include <SPI.h>
+#include <Servo.h>
 
 // Piny NRF905
 #define NRF905_CSN   10
@@ -35,6 +39,7 @@
 #define NRF905_PWR   8
 #define NRF905_TX_EN 7
 #define NRF905_DR    5
+
 
 // Komendy NRF905
 #define CMD_W_CONFIG     0x00
@@ -49,7 +54,6 @@
 #define CMD_MEASURE_STOP    0x02
 #define CMD_PUMP_ON         0x03  // Pompa 1 (napełnianie zbiornika)
 #define CMD_PUMP_OFF        0x04  // Pompa 1 
-#define CMD_STATUS_REQUEST  0x05
 #define CMD_SAMPLES_LOADING 0x06  // Sekwencja ładowania próbki (pompa 2)
 #define CMD_REJECT_SAMPLE   0x07  // Odrzut próbki - opróżnianie (pompa 2)
 #define CMD_BOAT_DRIVE      0x20  // Napęd łódki: param1=lewy(0-200), param2=prawy(0-200), 100=stop (radio nie pozwala wysyłac ujemnych więc przesuwamy zakres do 0-200)
@@ -60,6 +64,13 @@
 
 // SPI Settings
 SPISettings nrf905_spi(200000, MSBFIRST, SPI_MODE0);
+// ─── PINY serva ───────────────────────────────────────────
+
+#define CMD_CAMERA_SERVO  0x05
+#define CAMERA_SERVO_PIN  A0
+
+Servo cameraServo;
+int   cameraAngle = 90;
 
 // ─── PINY SILNIKÓW (Cytron MDD20A) ───────────────────────────────────────────
 #define MOTOR_LEFT_PWM  3   // D3  - lewy silnik prędkość (PWM)
@@ -146,6 +157,9 @@ void setup() {
 
   initNRF905();
   enterRXMode();
+
+  cameraServo.attach(CAMERA_SERVO_PIN);
+  cameraServo.write(90);
 
   // Inicjalizacja danych
   sensorData.stationID  = 1;
@@ -318,6 +332,13 @@ void processCommand(uint8_t cmd, uint16_t param1, uint16_t param2) {
     case CMD_REJECT_SAMPLE:             
       Serial.println(F("REJECT_SAMPLE"));
       break;
+
+    case CMD_CAMERA_SERVO: {
+    int angle = constrain((int)param1, 0, 180);
+    cameraAngle = angle;
+    cameraServo.write(cameraAngle);
+    break;
+    }
 
     case CMD_BOAT_DRIVE: {
       // param1=lewy(0-200), param2=prawy(0-200), 100=zatrzymanie

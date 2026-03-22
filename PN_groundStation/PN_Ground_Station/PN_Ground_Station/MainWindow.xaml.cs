@@ -41,7 +41,6 @@ namespace PN_Ground_Station
             Loaded += Window_Loaded;
             Closing += Window_Closing;
         }
-        
         private void UpdateBatteryIndicator(double voltageV)
         {
             double percent = Math.Clamp(
@@ -177,9 +176,13 @@ namespace PN_Ground_Station
             }
         }
 
-        private void BtnDisconnect_Click(object sender, RoutedEventArgs e)
+        private async void BtnDisconnect_Click(object sender, RoutedEventArgs e)
         {
-            _tcpClient.Disconnect();
+            if (_tcpClient.IsConnected)
+            {
+                await _tcpClient.SendCommandAsync("camera_servo", 90, 0);
+                await Task.Delay(300);
+            }
 
             btnConnect.IsEnabled = true;
             btnDisconnect.IsEnabled = false;
