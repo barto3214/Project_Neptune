@@ -49,11 +49,11 @@ SIG (pomarańczowy) → GPIO 18 (pin 12, PWM)
 
 
 Przekaźniki pomp:
-MOSFET VIN+   →  GPIO 24 (pompa 1) / GPIO 25 (pompa 2)
-MOSFET VIN-   →  GND RPi
+MOSFET VIN+   →  12V zasilacz(przetwornica 12V) + 
+MOSFET VIN-   →  GND przetwornicy 12 V
 
-MOSFET PWM  →  12V zasilacz +
-MOSFET GND-  →  GND zasilacz (masa wspólna z RPi)
+MOSFET PWM  →  GPIO 24 (pompa 1) / GPIO 25 (pompa 2)
+MOSFET GND-  →  GND przetwornicy 12V(output) (masa wspólna z RPi)
 
 MOSFET OUT+  →  Pompa +
 MOSFET OUT-  →  Pompa -
@@ -102,7 +102,7 @@ Pin 9 → GPIO21(Pin 40)
 
 ZAJĘTE PINY RPi: 10 pinów fizycznych
 
-//Nietestowane
+
 ┌──────────────────────────────────────────────────────────┐
 │           Arduino Nano (łódka)    →     Cytron MDD20A    					│
 ├──────────────────────────────────────────────────────────┤
