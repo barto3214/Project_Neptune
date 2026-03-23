@@ -126,7 +126,7 @@ Czujnik prądu INA219 dwukierunkowy
 VCC → 3.3V
 GND → GND na Raspberry pi + "-" z sieci której prąd mierzymy 
 VIN +(zielone gniazdo) → zostawić wolne
-VIN -(zielone gniazdo) → GPIO20(Pin 38) (SPRAWDZIĆ AKTUALNE PRZYŁĄCZENIE) 
+VIN -(zielone gniazdo) → GPIO26 (Pin 37)  
 VIN + → ZOSTAW WOLNE
 VIN - → ZOSTAW WOLNE
 
