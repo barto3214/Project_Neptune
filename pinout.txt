@@ -121,16 +121,16 @@ ZAJĘTE PINY RPi: 10 pinów fizycznych
 ZAJĘTE PINY RPi #2: GPIO 2,3,4,16,17,18,20,21,22,23,24,25,27 + USB
 ZAJĘTE PINY RPi #1: GPIO 8,9,10,11,17,22,27
 
-
-Czujnik prądu INA219 dwukierunkowy
-VCC → 3.3V RPI
-GND → GND na Raspberry pi + GND z sieci której prąd mierzymy 
-SDA → GPIO 2 (Pin 3)
-SCL → GPIO 3 (Pin 5) 
-VIN +(zielone gniazdo) → plus zasilania mierzonego obwodu
-VIN -(zielone gniazdo) → Do obciążenia (po shuncie)
-VIN + → ZOSTAW WOLNE
-VIN - → ZOSTAW WOLNE
+// czujnik wywalony - nie da rady - mierzenie napięcia odbywa sie teraz przez Arduino Nano 
+  Czujnik prądu INA219 dwukierunkowy
+  VCC → 3.3V RPI
+  GND → GND na Raspberry pi + GND z sieci której prąd mierzymy 
+  SDA → GPIO 2 (Pin 3)
+  SCL → GPIO 3 (Pin 5) 
+  VIN +(zielone gniazdo) → plus zasilania mierzonego obwodu
+  VIN -(zielone gniazdo) → Do obciążenia (po shuncie)
+  VIN + → ZOSTAW WOLNE
+  VIN - → ZOSTAW WOLNE
 
 Arduino Nano 
 A0  → sygnał servo (pomarańczowy/żółty)
