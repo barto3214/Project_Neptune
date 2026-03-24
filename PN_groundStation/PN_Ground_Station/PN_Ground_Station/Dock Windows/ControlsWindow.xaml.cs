@@ -48,7 +48,9 @@ namespace PN_Ground_Station.DockWindows
 
         private async void OnControlsKeyDown(object sender, KeyEventArgs e)
         {
-            // Servo — strzałki (tylko gdy camera active)
+            // ← dodaj ten guard na samej górze
+            if (!_tcpClient.IsConnected) return;
+
             if (_cameraActive)
             {
                 if (e.Key == Key.Left)
@@ -69,7 +71,6 @@ namespace PN_Ground_Station.DockWindows
                 }
             }
 
-            // Łódka — WSAD (tylko gdy boat active)
             if (_boat.IsActive)
                 _boat.OnKeyDown(sender, e);
         }

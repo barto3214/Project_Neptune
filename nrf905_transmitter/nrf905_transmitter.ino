@@ -72,6 +72,12 @@ SPISettings nrf905_spi(200000, MSBFIRST, SPI_MODE0);
 Servo cameraServo;
 int   cameraAngle = 90;
 
+// ─── PIN mierzenia prądu ───────────────────────────────────────────
+#define BATTERY_PIN A3
+
+const unsigned long BATTERY_READ_INTERVAL = 10000; // 10s
+unsigned long lastBatteryRead = 0;
+
 // ─── PINY SILNIKÓW (Cytron MDD20A) ───────────────────────────────────────────
 #define MOTOR_LEFT_PWM  3   // D3  - lewy silnik prędkość (PWM)
 #define MOTOR_LEFT_DIR  2   // D2  - lewy silnik kierunek
@@ -111,6 +117,7 @@ unsigned long lastRxCheck       = 0;
 unsigned long lastDataTransmit  = 0;
 const unsigned long RX_CHECK_INTERVAL      = 50;    // 50ms
 const unsigned long DATA_TRANSMIT_INTERVAL = 2000;  // 2s
+bool czparz = true;
 
 uint32_t rxCount = 0;
 uint32_t txCount = 0;
@@ -165,11 +172,26 @@ void setup() {
   sensorData.stationID  = 1;
   sensorData.errorFlags = 0;
   memset(sensorData.reserved, 0, sizeof(sensorData.reserved));
-  sensorData.reserved[0] = 0x10; 
-  Serial.setTimeout(10);
+  sensorData.reserved[0] = 0x10;
+
+  // FIX #3: zwiększony timeout — 10ms było za mało, RPi#2 może odpowiedzieć później
+  Serial.setTimeout(100);
 }
 
+
 // ─────────────────────────────────────────────────────────────────────────────
+void readAndSendBattery() {
+  int raw = analogRead(BATTERY_PIN);
+  // Dzielnik 1MΩ + 100kΩ: V_bat = V_pin * (1MΩ + 100kΩ) / 100kΩ = V_pin * 11
+  // Identyczny współczynnik jak 100k+10k — stosunek 11:1 bez zmian
+  float v_bat = (raw / 1023.0f) * 5.0f * 11.0f;          // V  (max ~55V)
+  sensorData.batteryVoltage = (uint16_t)((v_bat - 1.0f) * 1000.0f); // mV (max ~55000, mieści się w uint16_t)
+  sensorData.timestamp   = millis() / 1000;
+  sensorData.reserved[0] = 0x11; // PACKET_BATTERY
+  transmitData();
+  sensorData.reserved[0] = 0x10; // powrót do PACKET_DATA 
+}
+
 
 void loop() {
   // ODBIERANIE KOMEND z RPi#1
@@ -189,11 +211,17 @@ void loop() {
     processSerialData();
   }
 
-  // WATCHDOG ŁÓDKI — brak komendy przez 500ms = STOP
+  // WATCHDOG ŁÓDKI — brak komendy przez 800ms = STOP
   if (lastBoatCommand > 0 && millis() - lastBoatCommand >= BOAT_WATCHDOG_MS) {
     setMotor(MOTOR_LEFT_PWM,  MOTOR_LEFT_DIR,  0);
     setMotor(MOTOR_RIGHT_PWM, MOTOR_RIGHT_DIR, 0);
     lastBoatCommand = 0;  
+  }
+
+  // Co 10 sekund odczytaj napięcie baterii
+  if (millis() - lastBatteryRead >= BATTERY_READ_INTERVAL) {
+    readAndSendBattery();
+    lastBatteryRead = millis();
   }
 }
 
@@ -278,6 +306,20 @@ void enterTXMode() {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
+// FIX #1: Czyści flagę DR po TX — NRF905 ustawia DR=HIGH po zakończeniu transmisji
+// (ten sam pin co RX data ready). Bez czyszczenia checkForCommands() czyta śmieciowy
+// bufor RX, może trafić losowe CRC i wykonać np. CMD_MEASURE_STOP → autoMode=false → zera w aplikacji.
+void clearDRFlag() {
+  SPI.beginTransaction(nrf905_spi);
+  digitalWrite(NRF905_CSN, LOW);
+  SPI.transfer(CMD_R_RX_PAYLOAD);
+  for (int i = 0; i < 32; i++) SPI.transfer(0x00);
+  digitalWrite(NRF905_CSN, HIGH);
+  SPI.endTransaction();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 void checkForCommands() {
   // Sprawdź pin DR — jeśli LOW, brak danych, nie czytaj
   if (digitalRead(NRF905_DR) == LOW) return;
@@ -334,10 +376,10 @@ void processCommand(uint8_t cmd, uint16_t param1, uint16_t param2) {
       break;
 
     case CMD_CAMERA_SERVO: {
-    int angle = constrain((int)param1, 0, 180);
-    cameraAngle = angle;
-    cameraServo.write(cameraAngle);
-    break;
+      int angle = constrain((int)param1, 0, 180);
+      cameraAngle = angle;
+      cameraServo.write(cameraAngle);
+      break;
     }
 
     case CMD_BOAT_DRIVE: {
@@ -362,7 +404,6 @@ void processSerialData() {
   String line = Serial.readStringUntil('\n');
   line.trim();
   
-
   if (line.length() > 0) {
     digitalWrite(LED_BUILTIN, HIGH);
     delay(50);
@@ -398,13 +439,13 @@ void processSerialData() {
   else if (line.startsWith("BATTERY:")) {
     uint16_t mv = (uint16_t)line.substring(8).toInt();
     if (mv > 0) {
-        sensorData.batteryVoltage = mv;
-        sensorData.timestamp      = millis() / 1000;
-        sensorData.reserved[0]    = 0x11; // PACKET_BATTERY
-        transmitData();
-        sensorData.reserved[0]    = 0x10; // POWRÓT DO PACKET_DATA
+      sensorData.batteryVoltage = mv;
+      sensorData.timestamp      = millis() / 1000;
+      sensorData.reserved[0]    = 0x11; // PACKET_BATTERY
+      transmitData();
+      sensorData.reserved[0]    = 0x10; // POWRÓT DO PACKET_DATA
     }
-}
+  }
 }
 
 void transmitData() {
@@ -433,16 +474,21 @@ void transmitData() {
   // Transmisja
   enterTXMode();
   digitalWrite(NRF905_CE, HIGH);
-  delay(100);
+
+  // FIX #4: Czekaj na potwierdzenie zakończenia TX przez DR=HIGH (max 200ms)
+  // zamiast ślepego delay(100) — bardziej niezawodne, szczególnie przy słabym sygnale
+  unsigned long txStart = millis();
+  while (digitalRead(NRF905_DR) == LOW && millis() - txStart < 200);
+
   digitalWrite(NRF905_CE, LOW);
 
-  // Powrót do RX
+  // FIX #1: Wyczyść flagę DR po TX — bez tego checkForCommands() czyta śmieci
+  // z bufora RX gdy DR pozostaje HIGH po zakończeniu transmisji
   enterRXMode();
+  clearDRFlag();
 
   txCount++;
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Ustaw silnik: speed -100..+100 (0=stop, +100=pełny przód, -100=pełny wstecz)

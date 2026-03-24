@@ -14,13 +14,14 @@ Komunikacja Serial z Arduino:
   * STOP         - zatrzymaj pomiar
   * PUMP_ON      - włącz pompę
   * PUMP_OFF     - wyłącz pompę
+  * STATUS       - wyślij status
   * SAMPLES_LOADING - wykonaj sekwencję ładowania próbek
   * REJECT_SAMPLE   - wykonaj sekwencję odrzutu próbki
   * GET_DATA     - wyślij aktualne dane
 
 - Dane wysyłane (do Arduino):
   * DATA:7.2,350,22.5,700,1\n  (pH,TDS,Temp,Cond,Pump)
-  * STATUS BATERII:OK,BatteryMv,0\n         (Status,BatteryMv,ErrorFlags)
+  * STATUS:OK,3700,0\n         (Status,BatteryMv,ErrorFlags)
 
 Stream kamery:
   * http://<IP>:8080/stream    - MJPEG stream dla WPF
@@ -39,7 +40,6 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from adafruit_extended_bus import ExtendedI2C as I2C
 from adafruit_ads1x15.ads1115 import ADS1115
 from adafruit_ads1x15.analog_in import AnalogIn
-from adafruit_ina219 import INA219
 from dataclasses import dataclass
 import db_manager 
 import RPi.GPIO as GPIO
@@ -53,17 +53,14 @@ SERIAL_BAUD = 115200
 # Konfiguracja GPIO (piny)
 PUMP_1_RELAY_PIN = 24  # GPIO 24 dla przekaźnika pompy 1
 PUMP_2_RELAY_PIN = 25  # GPIO 25 dla przekaźnika pompy 2
-PUMP_DURATION = 5.0    # Czas pracy pompy w sekundach do załadunku probówki TODO: USTAWIĆ REALNY
+PUMP_DURATION = 2    # Czas pracy pompy w sekundach do załadunku probówki TODO: USTAWIĆ REALNY
 REJECT_POSITION = 0    # Pozycja karuzeli do odrzutu 
-REJECT_PUMP_TIME = 8.0 # Czas pracy pompy przy odrzucaniu próbki (do opróżnienia zbiornika) TODO: USTAWIĆ REALNY
-PUMP_1_MAX_TIME = 30.0 # Maksymalny czas pracy pompy 1 (żeby nie rozsadziło) TODO: USTAWIĆ REALNY
+REJECT_PUMP_TIME = 7.0 # Czas pracy pompy przy odrzucaniu próbki (do opróżnienia zbiornika) 
+PUMP_1_MAX_TIME = 7.0 # Maksymalny czas pracy pompy 1 (żeby nie rozsadziło) 
 
 # === I2C ===
 i2c = I2C(1)
 ads = ADS1115(i2c)
-
-# === INA219 - NAPIĘCIE BATERII ===
-ina219 = INA219(i2c)
 
 chan_ph  = AnalogIn(ads, 0)  # A0 - czujnik pH
 chan_ec  = AnalogIn(ads, 1)  # A1 - czujnik przewodności
@@ -121,22 +118,24 @@ TOTAL_POSITIONS = 6
 STEPS_PER_POSITION = 43  # Liczba kroków — używana jako backup gdy enkoder wyłączony
 
 # Pozycje servo
-SERVO_UP = 2.5    # Duty cycle % dla pozycji górnej 
-SERVO_DOWN = 11.7  # Duty cycle % dla pozycji dolnej 
+SERVO_UP = 11.7    # Duty cycle % dla pozycji górnej 
+SERVO_DOWN = 2.5  # Duty cycle % dla pozycji dolnej 
 
 # === ENKODER HEDL-5540 ===
+
+#              Pin5(GREEN)→GPIO16, Pin7(VIOLET)→GPIO20, Pin9(WHITE)→GPIO21
 ENC_A               = 16    # GPIO 16 (PIN 36) - kanał A
 ENC_B               = 20    # GPIO 20 (PIN 38) - kanał B
 ENC_I               = 21    # GPIO 21 (PIN 40) - index (jeden impuls/obrót)
 ENCODER_ENABLED     = True  # False = tryb krokowy bez enkodera
-TICKS_PER_POSITION  = 165   # liczba ticków enkodera na jedną pozycję karuzeli 
-ENCODER_TOLERANCE   = 3     # Dopuszczalny błąd pozycji w tickach
+TICKS_PER_POSITION  = 165   # TODO: USTAWIĆ Z KALIBRACJI (kalibracja.py opcja 3)
+ENCODER_TOLERANCE   = 2     # Dopuszczalny błąd pozycji w tickach
 ENCODER_MAX_RETRIES = 3     # Ile razy próbować korekty zanim się podda
 ENCODER_TIMEOUT     = 15.0  # Max sekund na jeden obrót
 
-# Licznik ticków enkodera 
+# Licznik ticków enkodera — aktualizowany przez wątek pollingu
 _enc_tick_count = 0
-_enc_last_a     = 0  # poprzedni stan kanału A 
+_enc_last_a     = 0  # poprzedni stan kanału A (do detekcji zbocza przez polling)
 
 # ============================================================
 # KONFIGURACJA KAMERY
@@ -345,7 +344,6 @@ def camera_capture_loop():
                     _frame_event.clear()
 
         except Exception as e:
-            print(f"[CAM] Proces kamery zakończony: {e}")
             print(f"[CAM] Błąd: {e} — restart za 2s")
             time.sleep(2)
 
@@ -473,30 +471,31 @@ def init_serial():
             timeout=0.1,
             write_timeout=1.0
         )
+        ser.setDTR(False)  
         print(f"Serial otwarty: {SERIAL_PORT} @ {SERIAL_BAUD}")
         time.sleep(2)
         return True
     except Exception as e:
         print(f"Błąd otwarcia Serial: {e}")
         return False
-
+    
 # ============================================================
 # CZUJNIKI
 # ============================================================
 def read_sensors():
     temp = SensorData.read_temp()
     sensor_data['ph']           = SensorData.read_ph_avg()
-    sensor_data['temperature']  = temp
+    sensor_data['temperature']  = temp if temp is not None else 0.0  
     sensor_data['conductivity'] = SensorData.read_ec_avg()
     sensor_data['tds']          = SensorData.voltage_to_tds(
                                       chan_tds.voltage,
-                                      temp if temp is not None else 25.0
+                                      sensor_data['temperature']
                                   )
     db_manager.add_measurement(
         time.time(),
         round(sensor_data['ph'], 2),
         round(sensor_data['tds'], 2),
-        round(sensor_data['temperature'], 2),
+        round(sensor_data['temperature'], 2),   
         round(sensor_data['conductivity'], 2)
     )
 
@@ -533,19 +532,16 @@ def send_data():
         except Exception as e:
             print(f"Błąd wysyłania: {e}")
 
-def send_battery_loop():
-    while True:
-        time.sleep(10)
-        if ser and ser.is_open:
-            try:
-                battery_mv = int(ina219.bus_voltage * 1000)
-            except Exception:
-                battery_mv = 0
-            try:
-                ser.write(f"BATTERY:{battery_mv}\n".encode('utf-8'))
-                print(f"Bateria: {battery_mv}mV ({battery_mv/1000:.2f}V)")
-            except Exception as e:
-                print(f"Błąd wysyłania statusu baterii: {e}")
+def send_status():
+    if ser and ser.is_open:
+        battery_mv  = 3700  # TODO: Odczyt napięcia baterii
+        error_flags = 0
+        status_str  = f"STATUS:OK,{battery_mv},{error_flags}\n"
+        try:
+            ser.write(status_str.encode('utf-8'))
+            print(f"Status: {status_str.strip()}")
+        except Exception as e:
+            print(f"Błąd wysyłania statusu: {e}")
 
 def process_command(command, GPIO=None):
     global measuring, measurement_start_time, measurement_duration, last_measure_time
@@ -583,6 +579,8 @@ def process_command(command, GPIO=None):
     elif command == "PUMP_OFF":
         control_pump_1(False, GPIO)
 
+    elif command == "STATUS":
+        send_status()
 
     elif command == "SAMPLES_LOADING":
         threading.Thread(target=loading_sequence, daemon=True).start()
@@ -633,9 +631,11 @@ def pump_2_sequence(duration):
     print("Pompa 2 ON")
     time.sleep(duration)
     GPIO.output(PUMP_2_RELAY_PIN, GPIO.LOW)
+    time.sleep(3)
     print("Pompa 2 OFF")
 
 def serial_listener(GPIO=None):
+    global ser
     print("Nasłuchiwanie komend...")
     buffer = b''
     while True:
@@ -654,8 +654,26 @@ def serial_listener(GPIO=None):
                         except UnicodeDecodeError:
                             print(f"Błąd dekodowania: {line}")
             except Exception as e:
-                print(f"Błąd odczytu Serial: {e}")
-                time.sleep(1)
+                print(f"Błąd Serial: {e} — reconnect za 2s...")
+                buffer = b''
+                try:
+                    ser.close()
+                except:
+                    pass
+                time.sleep(2)
+                try:
+                    ser = serial.Serial(
+                        port=SERIAL_PORT,
+                        baudrate=SERIAL_BAUD,
+                        timeout=0.1,
+                        write_timeout=1.0
+                    )
+                    ser.setDTR(False)  
+                    print("Serial reconnected OK")
+                except Exception as e2:
+                    print(f"Reconnect failed: {e2}")
+        else:
+            time.sleep(1)
         time.sleep(0.05)
 
 # ============================================================
@@ -675,10 +693,10 @@ def _rotate_ticks(target_ticks, direction=1, delay=0.002):
     """
     global _enc_tick_count
 
-    remaining = target_ticks  
+    remaining = target_ticks  # ile ticków jeszcze do przejechania
 
     for attempt in range(ENCODER_MAX_RETRIES):
-        _enc_tick_count = 0  
+        _enc_tick_count = 0  # reset licznika przed każdą próbą
         t0 = time.time()
 
         # Obracaj dopóki enkoder nie zliczy wymaganej liczby ticków
@@ -696,7 +714,7 @@ def _rotate_ticks(target_ticks, direction=1, delay=0.002):
                 time.sleep(delay)
 
         set_step(0, 0, 0, 0)
-        time.sleep(0.05)  
+        time.sleep(0.05)  # poczekaj aż karuzela się ustabilizuje
 
         # Sprawdź błąd pozycji
         final = abs(_enc_tick_count)
@@ -825,7 +843,7 @@ def main():
     print()
     print("=" * 60)
     print("RASPBERRY PI #2 - STACJA POMIAROWA")
-    print("Czujniki + Pompa + Karuzela + Serial do Arduino")
+    print("Czujniki + Pompa + Serial do Arduino")
     print("=" * 60)
     print()
     
@@ -847,9 +865,6 @@ def main():
     db_manager.init_database()
     db_thread = threading.Thread(target=db_manager.database_worker, daemon=True)
     db_thread.start()
-    
-    battery_thread = threading.Thread(target=send_battery_loop, daemon=True)
-    battery_thread.start()
 
     # Wątki kamery
     if CAM_ENABLED:
@@ -867,7 +882,7 @@ def main():
     print("=" * 60)
     print()
     print("Oczekiwanie na komendy z Arduino...")
-    print("Komendy: MEASURE:duration, STOP, PUMP_ON, PUMP_OFF, GET_DATA")
+    print("Komendy: MEASURE:duration, STOP, PUMP_ON, PUMP_OFF, GET_DATA, STATUS,LOADING_SAMPLES,REJECT_SAMPLES")
     print("Ctrl+C aby zakończyć")
     print()
 
