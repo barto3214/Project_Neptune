@@ -53,7 +53,7 @@ SERIAL_BAUD = 115200
 # Konfiguracja GPIO (piny)
 PUMP_1_RELAY_PIN = 24  # GPIO 24 dla przekaźnika pompy 1
 PUMP_2_RELAY_PIN = 25  # GPIO 25 dla przekaźnika pompy 2
-PUMP_DURATION = 2    # Czas pracy pompy w sekundach do załadunku probówki TODO: USTAWIĆ REALNY
+PUMP_DURATION = 2    # Czas pracy pompy w sekundach do załadunku probówki 
 REJECT_POSITION = 0    # Pozycja karuzeli do odrzutu 
 REJECT_PUMP_TIME = 7.0 # Czas pracy pompy przy odrzucaniu próbki (do opróżnienia zbiornika) 
 PUMP_1_MAX_TIME = 7.0 # Maksymalny czas pracy pompy 1 (żeby nie rozsadziło) 
