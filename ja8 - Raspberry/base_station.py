@@ -225,7 +225,7 @@ class NRF905Transceiver:
         config = [
             CMD_W_CONFIG,
             108,   # Channel 108 (433.2 MHz)
-            0x0C,  # 433MHz, 10dBm
+            0x3C,  # 433MHz, 10dBm
             0x44,  # 4-byte addresses
             32,    # RX payload width
             32,    # TX payload width

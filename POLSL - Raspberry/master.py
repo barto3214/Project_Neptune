@@ -14,7 +14,6 @@ Komunikacja Serial z Arduino:
   * STOP         - zatrzymaj pomiar
   * PUMP_ON      - włącz pompę
   * PUMP_OFF     - wyłącz pompę
-  * STATUS       - wyślij status
   * SAMPLES_LOADING - wykonaj sekwencję ładowania próbek
   * REJECT_SAMPLE   - wykonaj sekwencję odrzutu próbki
   * GET_DATA     - wyślij aktualne dane
@@ -128,7 +127,7 @@ ENC_A               = 16    # GPIO 16 (PIN 36) - kanał A
 ENC_B               = 20    # GPIO 20 (PIN 38) - kanał B
 ENC_I               = 21    # GPIO 21 (PIN 40) - index (jeden impuls/obrót)
 ENCODER_ENABLED     = True  # False = tryb krokowy bez enkodera
-TICKS_PER_POSITION  = 165   # TODO: USTAWIĆ Z KALIBRACJI (kalibracja.py opcja 3)
+TICKS_PER_POSITION  = 165   # Liczba ticków enkodera na jedną pozycję karuzeli 
 ENCODER_TOLERANCE   = 2     # Dopuszczalny błąd pozycji w tickach
 ENCODER_MAX_RETRIES = 3     # Ile razy próbować korekty zanim się podda
 ENCODER_TIMEOUT     = 15.0  # Max sekund na jeden obrót
@@ -532,17 +531,6 @@ def send_data():
         except Exception as e:
             print(f"Błąd wysyłania: {e}")
 
-def send_status():
-    if ser and ser.is_open:
-        battery_mv  = 3700  # TODO: Odczyt napięcia baterii
-        error_flags = 0
-        status_str  = f"STATUS:OK,{battery_mv},{error_flags}\n"
-        try:
-            ser.write(status_str.encode('utf-8'))
-            print(f"Status: {status_str.strip()}")
-        except Exception as e:
-            print(f"Błąd wysyłania statusu: {e}")
-
 def process_command(command, GPIO=None):
     global measuring, measurement_start_time, measurement_duration, last_measure_time
 
@@ -574,13 +562,11 @@ def process_command(command, GPIO=None):
         print("STOP pomiaru")
 
     elif command == "PUMP_ON":
-        control_pump_1(True, GPIO)
+        # control_pump_1(True, GPIO)
+        threading.Thread(target=control_pump_1(True, GPIO), daemon=True).start()
 
     elif command == "PUMP_OFF":
         control_pump_1(False, GPIO)
-
-    elif command == "STATUS":
-        send_status()
 
     elif command == "SAMPLES_LOADING":
         threading.Thread(target=loading_sequence, daemon=True).start()
@@ -817,6 +803,7 @@ def reject_sample():
         print("=== ODRZUT ZAKOŃCZONY ===\n")
         return {"success": True, "drained_from": original_position}
     finally:
+        print("Wychodzę z reject_sample → ustawiam is_busy=False")
         state.is_busy = False
 
 def loading_sequence():

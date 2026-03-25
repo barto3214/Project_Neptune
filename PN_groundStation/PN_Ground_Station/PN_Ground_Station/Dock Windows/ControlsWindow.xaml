@@ -201,7 +201,7 @@
                         <TextBlock Grid.Column="0" Text="Angle: " Foreground="#999999" FontWeight="Bold"
                        VerticalAlignment="Center"/>
                         <TextBlock x:Name="txtCameraAngle" Grid.Column="1"
-                       Text="90°" Foreground="#CCCCCC"
+                       Text="60" Foreground="#CCCCCC"
                        VerticalAlignment="Center"/>
                     </Grid>
                     <!-- Activate/Deactivate -->
@@ -212,7 +212,7 @@
                 Click="BtnCameraToggle_Click"/>
                     <!-- Reset do środka -->
                     <Button x:Name="btnCameraCenter"
-                Content="⟺  Center (90°)"
+                Content="⟺  Center"
                 Height="32" Margin="0,5"
                 Background="#3F3F46" Foreground="White"
                 Click="BtnCameraCenter_Click"/>

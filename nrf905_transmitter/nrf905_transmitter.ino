@@ -67,7 +67,7 @@ SPISettings nrf905_spi(200000, MSBFIRST, SPI_MODE0);
 // ─── PINY serva ───────────────────────────────────────────
 
 #define CMD_CAMERA_SERVO  0x05
-#define CAMERA_SERVO_PIN  A0
+#define CAMERA_SERVO_PIN  A1
 
 Servo cameraServo;
 int   cameraAngle = 90;
@@ -253,7 +253,7 @@ void initNRF905() {
 
   SPI.transfer(CMD_W_CONFIG);
   SPI.transfer(108);    // Channel 108 (433.2 MHz)
-  SPI.transfer(0x0C);   // 433MHz, 10dBm
+  SPI.transfer(0x3C);   // 433MHz, 10dBm
   SPI.transfer(0x44);   // 4-byte addresses
   SPI.transfer(32);     // RX payload width
   SPI.transfer(32);     // TX payload width
@@ -306,7 +306,7 @@ void enterTXMode() {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-// FIX #1: Czyści flagę DR po TX — NRF905 ustawia DR=HIGH po zakończeniu transmisji
+// Czyści flagę DR po TX — NRF905 ustawia DR=HIGH po zakończeniu transmisji
 // (ten sam pin co RX data ready). Bez czyszczenia checkForCommands() czyta śmieciowy
 // bufor RX, może trafić losowe CRC i wykonać np. CMD_MEASURE_STOP → autoMode=false → zera w aplikacji.
 void clearDRFlag() {

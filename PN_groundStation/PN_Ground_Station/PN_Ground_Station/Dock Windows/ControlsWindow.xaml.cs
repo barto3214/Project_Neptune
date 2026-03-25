@@ -140,9 +140,9 @@ namespace PN_Ground_Station.DockWindows
 
         private async void BtnCameraCenter_Click(object sender, RoutedEventArgs e)
         {
-            _cameraAngle = 90;
-            txtCameraAngle.Text = "90°";
-            await _tcpClient.SendCommandAsync("camera_servo", 90, 0);
+            _cameraAngle = 60;
+            txtCameraAngle.Text = "60";
+            await _tcpClient.SendCommandAsync("camera_servo", 60, 0);
         }
 
         // ── Scroll ───────────────────────────────────────────────────────────

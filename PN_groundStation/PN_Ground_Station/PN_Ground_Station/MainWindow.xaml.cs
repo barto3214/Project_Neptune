@@ -180,7 +180,7 @@ namespace PN_Ground_Station
         {
             if (_tcpClient.IsConnected)
             {
-                await _tcpClient.SendCommandAsync("camera_servo", 90, 0);
+                await _tcpClient.SendCommandAsync("camera_servo", 60, 0);
                 await Task.Delay(300);
             }
 
