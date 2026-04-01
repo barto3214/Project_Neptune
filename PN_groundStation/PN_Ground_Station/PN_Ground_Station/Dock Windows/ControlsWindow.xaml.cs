@@ -48,12 +48,11 @@ namespace PN_Ground_Station.DockWindows
 
         private async void OnControlsKeyDown(object sender, KeyEventArgs e)
         {
-            // ← dodaj ten guard na samej górze
             if (!_tcpClient.IsConnected) return;
 
             if (_cameraActive)
             {
-                if (e.Key == Key.Left)
+                if (e.Key == Key.Right)
                 {
                     _cameraAngle = Math.Max(0, _cameraAngle - CAMERA_STEP);
                     await _tcpClient.SendCommandAsync("camera_servo", _cameraAngle, 0);
@@ -61,7 +60,7 @@ namespace PN_Ground_Station.DockWindows
                     e.Handled = true;
                     return;
                 }
-                if (e.Key == Key.Right)
+                if (e.Key == Key.Left)
                 {
                     _cameraAngle = Math.Min(180, _cameraAngle + CAMERA_STEP);
                     await _tcpClient.SendCommandAsync("camera_servo", _cameraAngle, 0);

@@ -133,6 +133,6 @@ ZAJĘTE PINY RPi #1: GPIO 8,9,10,11,17,22,27
   VIN - → ZOSTAW WOLNE
 
 Arduino Nano 
-A0  → sygnał servo (pomarańczowy/żółty)
-5V  → VCC servo (czerwony)  
-GND → GND servo (brązowy/czarny)
+sygnał servo (pomarańczowy/żółty) → A1
+VCC servo (czerwony) → 5V na RPI#2  
+GND servo (brązowy/czarny) → GND RPI 
